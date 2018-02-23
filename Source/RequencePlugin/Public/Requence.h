@@ -39,4 +39,5 @@ public:
  	UFUNCTION()						URequenceDevice* GetDeviceByType(ERequenceDeviceType DeviceType);
 	UFUNCTION()						URequenceDevice* CreateDevice(FString DeviceName);
 	UFUNCTION(BlueprintCallable)	void DebugPrint();
+	UFUNCTION()						void ClearDevicesAndAxises();
 };

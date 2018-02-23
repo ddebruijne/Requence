@@ -6,9 +6,7 @@ URequence::URequence() {}
 
 bool URequence::LoadUnrealInput()
 {
-	Actions.Empty();
-	Axises.Empty();
-	Devices.Empty();
+	ClearDevicesAndAxises();
 
 	const UInputSettings* Settings = GetDefault<UInputSettings>();
 	if (!Settings) { return false; }
@@ -147,4 +145,11 @@ void URequence::DebugPrint()
 	{
 		UE_LOG(LogTemp, Log, TEXT("- No devices found!"));
 	}
+}
+
+void URequence::ClearDevicesAndAxises()
+{
+	Actions.Empty();
+	Axises.Empty();
+	Devices.Empty();
 }

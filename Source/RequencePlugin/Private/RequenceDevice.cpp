@@ -73,3 +73,23 @@ bool URequenceDevice::AddAxis(FRequenceInputAxis _axis)
 	Axises.Add(_axis);
 	return true;
 }
+
+bool URequenceDevice::RebindAction(FString ActionName, FKey NewKey, bool bShift = false, bool bCtrl = false, bool bAlt = false, bool bCmd = false)
+{
+
+}
+
+bool URequenceDevice::RebindAxis(FString AxisName, FKey NewKey, float Scale = 1.f)
+{
+
+}
+
+bool URequenceDevice::DeleteAction(FString ActionName)
+{
+
+}
+
+bool URequenceDevice::DeleteAxis(FString ActionName)
+{
+
+}
