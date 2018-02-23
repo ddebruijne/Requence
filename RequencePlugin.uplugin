@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Requence",
+	"Description": "Input System",
+	"Category": "Other",
+	"CreatedBy": "Danny de Bruijne",
+	"CreatedByURL": "https://dannydebruijne.com",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "RequencePlugin",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		}
+	]
+}
