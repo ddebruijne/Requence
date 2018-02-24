@@ -70,12 +70,12 @@ public:
 	UFUNCTION() bool DeleteAxis(FString AxisName);
 
 	//Retrieves this class' data as a JSON object.
-	UFUNCTION() TSharedPtr<FJsonObject> GetDeviceAsJson();
+	TSharedPtr<FJsonObject> GetDeviceAsJson();
 
 	//Retrieves action bindings as JSON array
-	UFUNCTION() TArray<TSharedPtr<FJsonValue>> GetActionsAsJson();
+	TArray<TSharedPtr<FJsonValue>> GetActionsAsJson();
 
 	//Retrieves axis bindings as JSON array
-	UFUNCTION() TArray<TSharedPtr<FJsonValue>> GetAxisesAsJson();
+	TArray<TSharedPtr<FJsonValue>> GetAxisesAsJson();
 
 };
