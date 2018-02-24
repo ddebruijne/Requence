@@ -34,27 +34,30 @@ public:
 	//Returns the device name by the set device key. Will return Unknown for unique devices.
 	static FString GetDeviceNameByType(ERequenceDeviceType DeviceType);
 
+	//Check whether the provided action is already in the list.
+	UFUNCTION() bool HasActionBinding(FString ActionName);
+
+	//Check whether the provided axis is already in the list.
+	UFUNCTION() bool HasAxisBinding(FString AxisName);
+
+	//Bubble sorts the actions and axises based on name.
+	UFUNCTION() void SortAlphabetically();
+
 	//Adds a new action to this device. Checks for doubles. returns success.
-	bool AddAction(FRequenceInputAction _action);
+	UFUNCTION() bool AddAction(FRequenceInputAction _action);
 
 	//Adds a new axis to this device. Checks for doubles. returns success.
-	bool AddAxis(FRequenceInputAxis _axis);
-
-	//Rebinds action by string to a new key. Shift, Ctrl, Alt and Cmd are false by default. returns success.
-	bool RebindAction(FString ActionName, FKey NewKey, bool bShift, bool bCtrl, bool bAlt, bool bCmd);
+	UFUNCTION() bool AddAxis(FRequenceInputAxis _axis);
 
 	//Rebinds action.
-	bool RebindAction(FRequenceInputAction UpdatedAction);
-
-	//Rebinds axis by string to a new key. Scale is 1.0 by default. returns success.
-	bool RebindAxis(FString AxisName, FKey NewKey, float Scale);
+	UFUNCTION() bool RebindAction(FRequenceInputAction UpdatedAction);
 
 	//Rebinds Axis
-	bool RebindAxis(FRequenceInputAxis UpdatedAxis);
+	UFUNCTION() bool RebindAxis(FRequenceInputAxis UpdatedAxis);
 
 	//Deletes action by string. returns success.
-	bool DeleteAction(FString ActionName);
+	UFUNCTION() bool DeleteAction(FString ActionName);
 
 	//Deletes axis by string. returns success.
-	bool DeleteAxis(FString AxisName);
+	UFUNCTION() bool DeleteAxis(FString AxisName);
 };

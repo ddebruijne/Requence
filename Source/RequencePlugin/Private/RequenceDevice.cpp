@@ -46,6 +46,73 @@ FString URequenceDevice::GetDeviceNameByType(ERequenceDeviceType DeviceType)
 	}
 }
 
+bool URequenceDevice::HasActionBinding(FString ActionName)
+{
+	for (FRequenceInputAction ac : Actions)
+	{
+		if (ac.ActionName == ActionName) 
+		{ 
+			if (ac.Key != FKey()) { return true; }
+		}
+	}
+	return false;
+}
+
+bool URequenceDevice::HasAxisBinding(FString AxisName)
+{
+	for (FRequenceInputAxis ax : Axises)
+	{
+		if (ax.AxisName == AxisName) 
+		{ 
+			if (ax.Key != FKey()) { return true; }
+		}
+	}
+	return false;
+}
+
+void URequenceDevice::SortAlphabetically()
+{
+	//Actions
+	bool acswapped = true;
+	int acJ = 0;
+	while (acswapped)
+	{
+		acswapped = false;
+		acJ++;
+
+		for (int i = 0; i < (Actions.Num() - acJ); i++)
+		{
+			if (Actions[i].ActionName > Actions[i + 1].ActionName)
+			{
+				FRequenceInputAction cache = Actions[i];
+				Actions[i] = Actions[i + 1];
+				Actions[i + 1] = cache;
+				acswapped = true;
+			}
+		}
+	}
+
+	//Axises
+	bool axswapped = true;
+	int axJ = 0;
+	while (axswapped)
+	{
+		axswapped = false;
+		axJ++;
+
+		for (int i = 0; i < (Axises.Num() - axJ); i++)
+		{
+			if (Axises[i].AxisName > Axises[i + 1].AxisName)
+			{
+				FRequenceInputAxis cache = Axises[i];
+				Axises[i] = Axises[i + 1];
+				Axises[i + 1] = cache;
+				axswapped = true;
+			}
+		}
+	}
+}
+
 bool URequenceDevice::AddAction(FRequenceInputAction _action)
 {
 	//Check for duplicates.
@@ -77,20 +144,20 @@ bool URequenceDevice::AddAxis(FRequenceInputAxis _axis)
 	return true;
 }
 
-bool URequenceDevice::RebindAction(FString ActionName, FKey NewKey, bool bShift = false, bool bCtrl = false, bool bAlt = false, bool bCmd = false)
-{
-	return false;
-}
+// bool URequenceDevice::RebindAction(FString ActionName, FKey NewKey, bool bShift = false, bool bCtrl = false, bool bAlt = false, bool bCmd = false)
+// {
+// 	return false;
+// }
 
 bool URequenceDevice::RebindAction(FRequenceInputAction UpdatedAction)
 {
 	return false;
 }
 
-bool URequenceDevice::RebindAxis(FString AxisName, FKey NewKey, float Scale = 1.f)
-{
-	return false;
-}
+// bool URequenceDevice::RebindAxis(FString AxisName, FKey NewKey, float Scale = 1.f)
+// {
+// 	return false;
+// }
 
 bool URequenceDevice::RebindAxis(FRequenceInputAxis UpdatedAxis)
 {

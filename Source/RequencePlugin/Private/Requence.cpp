@@ -54,6 +54,32 @@ bool URequence::LoadUnrealInput()
 		}
 	}
 
+	//Add empty bindings so every device has all the mappings. Also sort alphabetically.
+	for (URequenceDevice* d : Devices)
+	{
+		for (FRequenceInputAction ac : Actions)
+		{
+			if (!d->HasActionBinding(ac.ActionName)) 
+			{ 
+				FRequenceInputAction newAction;
+				newAction.ActionName = ac.ActionName;
+				d->Actions.Add(newAction);
+			}
+		}
+		for (FRequenceInputAxis ax : Axises)
+		{
+			if (!d->HasAxisBinding(ax.AxisName)) 
+			{ 
+				FRequenceInputAxis newAxis;
+				newAxis.AxisName = ax.AxisName;
+				d->Axises.Add(newAxis);
+			}
+		}
+
+		//Sort it!
+		d->SortAlphabetically();
+	}
+
 	//Add Axis Config
 
 	//Separate unique device into separate devices.
@@ -76,23 +102,29 @@ bool URequence::SaveUnrealInput(bool Force = false)
 		{
 			for (FRequenceInputAction ac : d->Actions)
 			{
-				FInputActionKeyMapping NewAction;
-				NewAction.ActionName = FName(*ac.ActionName);
-				NewAction.Key = ac.Key;
-				NewAction.bShift = ac.bShift;
-				NewAction.bCtrl = ac.bCmd;
-				NewAction.bAlt = ac.bAlt;
-				NewAction.bCmd = ac.bCmd;
-				Settings->ActionMappings.Add(NewAction);
+				if (ac.Key != FKey())
+				{
+					FInputActionKeyMapping NewAction;
+					NewAction.ActionName = FName(*ac.ActionName);
+					NewAction.Key = ac.Key;
+					NewAction.bShift = ac.bShift;
+					NewAction.bCtrl = ac.bCmd;
+					NewAction.bAlt = ac.bAlt;
+					NewAction.bCmd = ac.bCmd;
+					Settings->ActionMappings.Add(NewAction);
+				}
 			}
 
 			for (FRequenceInputAxis ax : d->Axises)
 			{
-				FInputAxisKeyMapping NewAxis;
-				NewAxis.AxisName = FName(*ax.AxisName);
-				NewAxis.Key = ax.Key;
-				NewAxis.Scale = ax.Scale;
-				Settings->AxisMappings.Add(NewAxis);
+				if (ax.Key != FKey())
+				{
+					FInputAxisKeyMapping NewAxis;
+					NewAxis.AxisName = FName(*ax.AxisName);
+					NewAxis.Key = ax.Key;
+					NewAxis.Scale = ax.Scale;
+					Settings->AxisMappings.Add(NewAxis);
+				}
 			}
 		}
 
