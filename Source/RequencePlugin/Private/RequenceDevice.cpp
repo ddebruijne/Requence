@@ -4,7 +4,6 @@
 
 URequenceDevice::URequenceDevice()
 {
-
 }
 
 ERequenceDeviceType URequenceDevice::GetDeviceTypeByKeyString(FString KeyString)
@@ -49,6 +48,7 @@ FString URequenceDevice::GetDeviceNameByType(ERequenceDeviceType DeviceType)
 
 bool URequenceDevice::AddAction(FRequenceInputAction _action)
 {
+	//Check for duplicates.
 	for (FRequenceInputAction action : Actions)
 	{
 		if (_action.Key == action.Key && _action.ActionName == action.ActionName)
@@ -58,38 +58,67 @@ bool URequenceDevice::AddAction(FRequenceInputAction _action)
 	}
 
 	Actions.Add(_action);
+	Updated = true;
 	return true;
 }
 
 bool URequenceDevice::AddAxis(FRequenceInputAxis _axis)
 {
+	//Check for duplicates.
 	for (FRequenceInputAxis axis : Axises)
 	{
-		if (_axis.Key == axis.Key && _axis.Key == axis.Key) {
+		if (_axis.Key == axis.Key && _axis.AxisName == axis.AxisName) {
 			return false;
 		}
 	}
 
 	Axises.Add(_axis);
+	Updated = true;
 	return true;
 }
 
 bool URequenceDevice::RebindAction(FString ActionName, FKey NewKey, bool bShift = false, bool bCtrl = false, bool bAlt = false, bool bCmd = false)
 {
 
+	return false;
 }
 
 bool URequenceDevice::RebindAxis(FString AxisName, FKey NewKey, float Scale = 1.f)
 {
 
+	return false;
 }
 
 bool URequenceDevice::DeleteAction(FString ActionName)
 {
-
+	if (Actions.Num() > 0) 
+	{
+		for (int i = Actions.Num() -1; i >= 0; i--)
+		{
+			if (Actions[i].ActionName == ActionName)
+			{
+				Actions.RemoveAt(i);
+				Updated = true;
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
-bool URequenceDevice::DeleteAxis(FString ActionName)
+bool URequenceDevice::DeleteAxis(FString AxisName)
 {
-
+	if (Axises.Num() > 0)
+	{
+		for (int i = Axises.Num() -1; i >= 0; i--)
+		{
+			if (Axises[i].AxisName == AxisName)
+			{
+				Axises.RemoveAt(i);
+				Updated = true;
+				return true;
+			}
+		}
+	}
+	return false;
 }

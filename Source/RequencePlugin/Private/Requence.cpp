@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Requence.h"
+#include "UObjectIterator.h"
 
 URequence::URequence() {}
 
@@ -8,7 +9,7 @@ bool URequence::LoadUnrealInput()
 {
 	ClearDevicesAndAxises();
 
-	const UInputSettings* Settings = GetDefault<UInputSettings>();
+	UInputSettings* Settings = GetMutableDefault<UInputSettings>();
 	if (!Settings) { return false; }
 
 	//ACTIONS
@@ -60,8 +61,45 @@ bool URequence::LoadUnrealInput()
 	return true;
 }
 
-bool URequence::SaveUnrealInput()
+bool URequence::SaveUnrealInput(bool Force = false)
 {
+	UInputSettings* Settings = GetMutableDefault<UInputSettings>();
+	if (!Settings) { return false; }
+
+	if (HasUpdated() || Force)
+	{
+		//Todo: Store a backup of these mappings - only empty them after the fact when its safe.
+		Settings->ActionMappings.Empty();
+		Settings->AxisMappings.Empty();
+
+		for (URequenceDevice* d : Devices)
+		{
+			for (FRequenceInputAction ac : d->Actions)
+			{
+				FInputActionKeyMapping NewAction;
+				NewAction.ActionName = FName(*ac.ActionName);
+				NewAction.Key = ac.Key;
+				NewAction.bShift = ac.bShift;
+				NewAction.bCtrl = ac.bCmd;
+				NewAction.bAlt = ac.bAlt;
+				NewAction.bCmd = ac.bCmd;
+				Settings->ActionMappings.Add(NewAction);
+			}
+
+			for (FRequenceInputAxis ax : d->Axises)
+			{
+				FInputAxisKeyMapping NewAxis;
+				NewAxis.AxisName = FName(*ax.AxisName);
+				NewAxis.Key = ax.Key;
+				NewAxis.Scale = ax.Scale;
+				Settings->AxisMappings.Add(NewAxis);
+			}
+		}
+
+		Settings->SaveKeyMappings();
+		return true;
+	}
+
 	return false;
 }
 
@@ -113,37 +151,61 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 	return nullptr;
 }
 
-void URequence::DebugPrint()
+void URequence::DebugPrint(bool UseDevices = true)
 {
 	UE_LOG(LogTemp, Log, TEXT("Requence Debug Print:"));
-	if (Devices.Num() > 0) 
+	if (UseDevices)
 	{
-		UE_LOG(LogTemp, Log, TEXT("- Devices found: %i"), Devices.Num());
-		UE_LOG(LogTemp, Log, TEXT("- Actions found: %i"), Actions.Num());
-		UE_LOG(LogTemp, Log, TEXT("- Axises found: %i"), Axises.Num());
-		for (URequenceDevice* Device : Devices)
+		if (Devices.Num() > 0)
 		{
-			UE_LOG(LogTemp, Log, TEXT("- %s: %s. (Ax: %i, Ac: %i)"), *EnumToString(TEXT("ERequenceDeviceType"), Device->DeviceType), *Device->DeviceString, Device->Axises.Num(), Device->Actions.Num());
+			UE_LOG(LogTemp, Log, TEXT("- Devices found: %i"), Devices.Num());
+			UE_LOG(LogTemp, Log, TEXT("- Actions found: %i"), Actions.Num());
+			UE_LOG(LogTemp, Log, TEXT("- Axises found: %i"), Axises.Num());
+			for (URequenceDevice* Device : Devices)
+			{
+				UE_LOG(LogTemp, Log, TEXT("- %s: %s. (Ax: %i, Ac: %i)"), *EnumToString(TEXT("ERequenceDeviceType"), Device->DeviceType), *Device->DeviceString, Device->Axises.Num(), Device->Actions.Num());
 
-			if (Axises.Num() > 0)
-			{
-				for (FRequenceInputAxis ax : Device->Axises)
+				if (Axises.Num() > 0)
 				{
-					UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.KeyAsString);
+					for (FRequenceInputAxis ax : Device->Axises)
+					{
+						UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.KeyAsString);
+					}
+				}
+				if (Actions.Num() > 0)
+				{
+					for (FRequenceInputAction ac : Device->Actions)
+					{
+						UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyAsString);
+					}
 				}
 			}
-			if (Actions.Num() > 0)
-			{
-				for (FRequenceInputAction ac : Device->Actions)
-				{
-					UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyAsString);
-				}
-			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("- No devices found!"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("- No devices found!"));
+		if (Axises.Num() > 0)
+		{
+			UE_LOG(LogTemp, Log, TEXT("- Axises found: %i"), Axises.Num());
+			for (FRequenceInputAxis ax : Axises)
+			{
+				UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.KeyAsString);
+			}
+		}
+		else { UE_LOG(LogTemp, Log, TEXT("- No Axises found!")); }
+		if (Actions.Num() > 0)
+		{
+			UE_LOG(LogTemp, Log, TEXT("- Actions found: %i"), Actions.Num());
+			for (FRequenceInputAction ac : Actions)
+			{
+				UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyAsString);
+			}
+		}
+		else { UE_LOG(LogTemp, Log, TEXT("- No Actions found!")); }
 	}
 }
 
@@ -152,4 +214,16 @@ void URequence::ClearDevicesAndAxises()
 	Actions.Empty();
 	Axises.Empty();
 	Devices.Empty();
+}
+
+bool URequence::HasUpdated()
+{
+	if (Devices.Num() > 0)
+	{
+		for (URequenceDevice* d : Devices)
+		{
+			if (d->Updated) { return true; }
+		}
+	}
+	return false;
 }

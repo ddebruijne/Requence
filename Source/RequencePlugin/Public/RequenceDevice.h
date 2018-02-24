@@ -20,10 +20,11 @@ class URequenceDevice : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)	FString DeviceString = "Unknown";
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)	ERequenceDeviceType DeviceType = ERequenceDeviceType::RDT_Unknown;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TArray<FRequenceInputAction> Actions;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)	TArray<FRequenceInputAxis> Axises;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)		FString DeviceString = "Unknown";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)		ERequenceDeviceType DeviceType = ERequenceDeviceType::RDT_Unknown;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)		TArray<FRequenceInputAction> Actions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)		TArray<FRequenceInputAxis> Axises;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Updated = false;
 
 	URequenceDevice();
 
@@ -49,5 +50,5 @@ public:
 	bool DeleteAction(FString ActionName);
 
 	//Deletes axis by string. returns success.
-	bool DeleteAxis(FString ActionName);
+	bool DeleteAxis(FString AxisName);
 };

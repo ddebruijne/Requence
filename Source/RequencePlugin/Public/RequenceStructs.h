@@ -29,13 +29,13 @@ struct FRequenceInputAction
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	FString ActionName = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	FString KeyAsString = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	FKey Key;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	uint32 bShift : 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	uint32 bCtrl : 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	uint32 bAlt : 1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	uint32 bCmd : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString ActionName = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString KeyAsString = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FKey Key;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	uint32 bShift : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	uint32 bCtrl : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	uint32 bAlt : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	uint32 bCmd : 1;
 
 	FRequenceInputAction() {}
 	FRequenceInputAction(const FString InActionName, const FKey InKey, const bool bInShift, const bool bInCtrl, const bool bInAlt, const bool bInCmd)
@@ -57,10 +57,10 @@ struct FRequenceInputAxis
 	GENERATED_USTRUCT_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	FString AxisName = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	FString KeyAsString = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	FKey Key;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input Song")	float Scale = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString AxisName = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString KeyAsString = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FKey Key;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	float Scale = 1;
 
 	FRequenceInputAxis() {}
 	FRequenceInputAxis(const FString InAxisName, FKey InKey, float InScale)

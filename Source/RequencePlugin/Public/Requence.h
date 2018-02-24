@@ -31,13 +31,14 @@ public:
 	UPROPERTY(BlueprintReadOnly)		TArray<URequenceDevice*>		Devices;
 
 	//Core functions
-	UFUNCTION(BlueprintCallable)	bool LoadUnrealInput();		//Converts Unreals' Input.ini to our format
-	UFUNCTION(BlueprintCallable)	bool SaveUnrealInput();		//Places our format safely back as Input.ini
+	UFUNCTION(BlueprintCallable)	bool LoadUnrealInput();					//Converts Unreals' Input.ini to our format
+	UFUNCTION(BlueprintCallable)	bool SaveUnrealInput(bool Force);		//Places our format safely back as Input.ini
 
 	//Helper Functions
  	UFUNCTION()						URequenceDevice* GetDeviceByName(FString DeviceName);
  	UFUNCTION()						URequenceDevice* GetDeviceByType(ERequenceDeviceType DeviceType);
 	UFUNCTION()						URequenceDevice* CreateDevice(FString DeviceName);
-	UFUNCTION(BlueprintCallable)	void DebugPrint();
+	UFUNCTION(BlueprintCallable)	void DebugPrint(bool UseDevices);
 	UFUNCTION()						void ClearDevicesAndAxises();
+	UFUNCTION()						bool HasUpdated();
 };
