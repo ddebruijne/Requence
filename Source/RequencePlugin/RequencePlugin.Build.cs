@@ -33,7 +33,9 @@ public class RequencePlugin : ModuleRules
                 "InputCore",
                 "Slate",
                 "SlateCore",
-                "Projects"
+                "Projects",
+                "Json",
+                "JsonUtilities"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -43,6 +45,8 @@ public class RequencePlugin : ModuleRules
 			new string[]
 			{
 				"InputDevice",
+                "Json",
+                "JsonUtilities"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

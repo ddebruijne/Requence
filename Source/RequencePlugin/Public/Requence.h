@@ -31,14 +31,17 @@ public:
 	UPROPERTY(BlueprintReadOnly)	TArray<URequenceDevice*>		Devices;
 
 	//Core functions
-	UFUNCTION(BlueprintCallable)	bool LoadUnrealInput();					//Converts Unreals' Input.ini to our format
-	UFUNCTION(BlueprintCallable)	bool SaveUnrealInput(bool Force);		//Places our format safely back as Input.ini
+	UFUNCTION(BlueprintCallable)	bool LoadUnrealInput();								//Converts Unreals' Input.ini to our format
+	UFUNCTION(BlueprintCallable)	bool SaveUnrealInput(bool Force);					//Places our format safely back as Input.ini
+	UFUNCTION(BlueprintCallable)	void ExportDeviceAsPreset(URequenceDevice* Device);	//Exports a given device to JSON format.
+	UFUNCTION(BlueprintCallable)	bool ImportDeviceAsPreset(FString FileName);		//Imports a JSON file and creates a device.
 
 	//Helper Functions
- 	UFUNCTION(BlueprintCallable)	URequenceDevice* GetDeviceByName(FString DeviceName);
+ 	UFUNCTION(BlueprintCallable)	URequenceDevice* GetDeviceByString(FString DeviceName);
  	UFUNCTION(BlueprintCallable)	URequenceDevice* GetDeviceByType(ERequenceDeviceType DeviceType);
 	UFUNCTION()						URequenceDevice* CreateDevice(FString DeviceName);
 	UFUNCTION(BlueprintCallable)	void DebugPrint(bool UseDevices);
 	UFUNCTION()						void ClearDevicesAndAxises();
 	UFUNCTION(BlueprintCallable)	bool HasUpdated();
+	UFUNCTION(BlueprintCallable)	FString GetPresetExportFilePath() { return FPaths::GameSavedDir() + "InputPresets/"; }
 };

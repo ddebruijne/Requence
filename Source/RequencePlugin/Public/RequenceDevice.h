@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "RequenceStructs.h"
+#include "JsonValue.h"
 #include "RequenceDevice.generated.h"
 
 /*
@@ -20,7 +21,8 @@ class URequenceDevice : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)		FString DeviceString = "Unknown";
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)		FString DeviceString = "Unknown";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)		FString DeviceName = "Unknown";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		ERequenceDeviceType DeviceType = ERequenceDeviceType::RDT_Unknown;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAction> Actions;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAxis> Axises;
@@ -66,4 +68,14 @@ public:
 
 	//Deletes axis by string. returns success.
 	UFUNCTION() bool DeleteAxis(FString AxisName);
+
+	//Retrieves this class' data as a JSON object.
+	UFUNCTION() TSharedPtr<FJsonObject> GetDeviceAsJson();
+
+	//Retrieves action bindings as JSON array
+	UFUNCTION() TArray<TSharedPtr<FJsonValue>> GetActionsAsJson();
+
+	//Retrieves axis bindings as JSON array
+	UFUNCTION() TArray<TSharedPtr<FJsonValue>> GetAxisesAsJson();
+
 };

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "RequenceDevice.h"
+#include "JsonObject.h"
 
 URequenceDevice::URequenceDevice()
 {
@@ -219,4 +220,52 @@ bool URequenceDevice::DeleteAxis(FString AxisName)
 		}
 	}
 	return false;
+}
+
+TSharedPtr<FJsonObject> URequenceDevice::GetDeviceAsJson()
+{
+	TSharedPtr<FJsonObject> Preset = MakeShareable(new FJsonObject);
+	Preset->SetStringField("DeviceString", DeviceString);
+	Preset->SetStringField("DeviceType", EnumToString(TEXT("ERequenceDeviceType"), DeviceType));
+
+	Preset->SetArrayField("Actions", GetActionsAsJson());
+	Preset->SetArrayField("Axises", GetAxisesAsJson());
+	Preset->SetStringField("Timestamp", FDateTime::Now().ToString());
+
+	return Preset;
+}
+
+TArray<TSharedPtr<FJsonValue>> URequenceDevice::GetActionsAsJson()
+{
+	TArray<TSharedPtr<FJsonValue>> JsonActions;
+	for (FRequenceInputAction ac : Actions)
+	{
+		TSharedPtr<FJsonObject> Action = MakeShareable(new FJsonObject);
+		Action->SetStringField("ActionName", ac.ActionName);
+		Action->SetStringField("Key", ac.Key.ToString());
+		Action->SetBoolField("bShift", ac.bShift);
+		Action->SetBoolField("bCtrl", ac.bCtrl);
+		Action->SetBoolField("bAlt", ac.bAlt);
+		Action->SetBoolField("bCmd", ac.bCmd);
+
+		TSharedRef<FJsonValueObject> ActionValue = MakeShareable(new FJsonValueObject(Action));
+		JsonActions.Add(ActionValue);
+	}
+	return JsonActions;
+}
+
+TArray<TSharedPtr<FJsonValue>> URequenceDevice::GetAxisesAsJson()
+{
+	TArray<TSharedPtr<FJsonValue>> JsonAxises;
+	for (FRequenceInputAxis ax : Axises)
+	{
+		TSharedPtr<FJsonObject> Axis = MakeShareable(new FJsonObject);
+		Axis->SetStringField("AxisName", ax.AxisName);
+		Axis->SetStringField("Key", ax.Key.ToString());
+		Axis->SetNumberField("Scale", (double)ax.Scale);
+
+		TSharedRef<FJsonValueObject> AxisValue = MakeShareable(new FJsonValueObject(Axis));
+		JsonAxises.Add(AxisValue);
+	}
+	return JsonAxises;
 }

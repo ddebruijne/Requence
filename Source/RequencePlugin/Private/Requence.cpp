@@ -2,6 +2,12 @@
 
 #include "Requence.h"
 #include "UObjectIterator.h"
+#include "JsonObject.h"
+#include "JsonWriter.h"
+#include "JsonSerializer.h"
+#include "PlatformFilemanager.h"
+#include "Paths.h"
+#include "FileHelper.h"
 
 URequence::URequence() {}
 
@@ -134,7 +140,36 @@ bool URequence::SaveUnrealInput(bool Force = false)
 	return false;
 }
 
-URequenceDevice* URequence::GetDeviceByName(FString DeviceName)
+void URequence::ExportDeviceAsPreset(URequenceDevice* Device)
+{
+	//Serialize JSON
+	FString OutputString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(Device->GetDeviceAsJson().ToSharedRef(), Writer);
+
+	//Save to file
+	FString FileName = FString(Device->DeviceString + "_" + FDateTime::Now().ToString() + ".json");
+	bool bAllowOverwriting = true;
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+	if (PlatformFile.CreateDirectoryTree(*GetPresetExportFilePath()))
+	{
+		FString AbsolutePath = GetPresetExportFilePath() + FileName;
+
+		if (bAllowOverwriting || !PlatformFile.FileExists(*AbsolutePath))
+		{
+			FFileHelper::SaveStringToFile(OutputString, *AbsolutePath);
+			UE_LOG(LogTemp, Log, TEXT("Exported %s as preset to %s"), *Device->DeviceString, *AbsolutePath);
+		}
+	}
+}
+
+bool URequence::ImportDeviceAsPreset(FString FileName)
+{
+	return false;
+}
+
+URequenceDevice* URequence::GetDeviceByString(FString DeviceName)
 {
 	if (Devices.Num() > 0)
 	{
@@ -175,6 +210,7 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 		URequenceDevice* device = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
 		device->DeviceType = NewDeviceType;
 		device->DeviceString = URequenceDevice::GetDeviceNameByType(NewDeviceType);
+		device->DeviceName = device->DeviceString;
 		Devices.Add(device);
 		return device;
 	}
