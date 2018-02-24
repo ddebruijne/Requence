@@ -17,7 +17,7 @@
 *  Dependencies:
 *  - JoystickPlugin 
 */
-UCLASS()
+UCLASS(EditInlineNew, Meta=(BlueprintSpawnableComponent))
 class URequence : public UObject
 {
 	GENERATED_BODY()
