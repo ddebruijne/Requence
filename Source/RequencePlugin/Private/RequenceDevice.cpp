@@ -79,13 +79,21 @@ bool URequenceDevice::AddAxis(FRequenceInputAxis _axis)
 
 bool URequenceDevice::RebindAction(FString ActionName, FKey NewKey, bool bShift = false, bool bCtrl = false, bool bAlt = false, bool bCmd = false)
 {
+	return false;
+}
 
+bool URequenceDevice::RebindAction(FRequenceInputAction UpdatedAction)
+{
 	return false;
 }
 
 bool URequenceDevice::RebindAxis(FString AxisName, FKey NewKey, float Scale = 1.f)
 {
+	return false;
+}
 
+bool URequenceDevice::RebindAxis(FRequenceInputAxis UpdatedAxis)
+{
 	return false;
 }
 

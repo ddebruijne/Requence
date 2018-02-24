@@ -26,19 +26,19 @@ public:
 	URequence();
 
 	//Data
-	UPROPERTY(BlueprintReadOnly)		TArray<FRequenceInputAction>	Actions;	//All Actions (not separated across devices)
-	UPROPERTY(BlueprintReadOnly)		TArray<FRequenceInputAxis>		Axises;		//All Axises (not separated across devices)
-	UPROPERTY(BlueprintReadOnly)		TArray<URequenceDevice*>		Devices;
+	UPROPERTY(BlueprintReadOnly)	TArray<FRequenceInputAction>	Actions;	//All Actions (not separated across devices)
+	UPROPERTY(BlueprintReadOnly)	TArray<FRequenceInputAxis>		Axises;		//All Axises (not separated across devices)
+	UPROPERTY(BlueprintReadOnly)	TArray<URequenceDevice*>		Devices;
 
 	//Core functions
 	UFUNCTION(BlueprintCallable)	bool LoadUnrealInput();					//Converts Unreals' Input.ini to our format
 	UFUNCTION(BlueprintCallable)	bool SaveUnrealInput(bool Force);		//Places our format safely back as Input.ini
 
 	//Helper Functions
- 	UFUNCTION()						URequenceDevice* GetDeviceByName(FString DeviceName);
- 	UFUNCTION()						URequenceDevice* GetDeviceByType(ERequenceDeviceType DeviceType);
+ 	UFUNCTION(BlueprintCallable)	URequenceDevice* GetDeviceByName(FString DeviceName);
+ 	UFUNCTION(BlueprintCallable)	URequenceDevice* GetDeviceByType(ERequenceDeviceType DeviceType);
 	UFUNCTION()						URequenceDevice* CreateDevice(FString DeviceName);
 	UFUNCTION(BlueprintCallable)	void DebugPrint(bool UseDevices);
 	UFUNCTION()						void ClearDevicesAndAxises();
-	UFUNCTION()						bool HasUpdated();
+	UFUNCTION(BlueprintCallable)	bool HasUpdated();
 };

@@ -14,16 +14,16 @@
 *
 *  ...
 */
-UCLASS()
+UCLASS(EditInlineNew, Meta = (BlueprintSpawnableComponent))
 class URequenceDevice : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)		FString DeviceString = "Unknown";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)		FString DeviceString = "Unknown";
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		ERequenceDeviceType DeviceType = ERequenceDeviceType::RDT_Unknown;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)		TArray<FRequenceInputAction> Actions;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)		TArray<FRequenceInputAxis> Axises;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAction> Actions;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAxis> Axises;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Updated = false;
 
 	URequenceDevice();
@@ -43,8 +43,14 @@ public:
 	//Rebinds action by string to a new key. Shift, Ctrl, Alt and Cmd are false by default. returns success.
 	bool RebindAction(FString ActionName, FKey NewKey, bool bShift, bool bCtrl, bool bAlt, bool bCmd);
 
+	//Rebinds action.
+	bool RebindAction(FRequenceInputAction UpdatedAction);
+
 	//Rebinds axis by string to a new key. Scale is 1.0 by default. returns success.
 	bool RebindAxis(FString AxisName, FKey NewKey, float Scale);
+
+	//Rebinds Axis
+	bool RebindAxis(FRequenceInputAxis UpdatedAxis);
 
 	//Deletes action by string. returns success.
 	bool DeleteAction(FString ActionName);
