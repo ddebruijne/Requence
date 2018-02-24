@@ -46,6 +46,32 @@ FString URequenceDevice::GetDeviceNameByType(ERequenceDeviceType DeviceType)
 	}
 }
 
+void URequenceDevice::CompactifyAllKeyNames()
+{
+	for (FRequenceInputAction& ac : Actions)
+	{
+		ac.KeyAsString = CompactifyKeyName(ac.KeyAsString);
+	}
+	for (FRequenceInputAxis& ax : Axises)
+	{
+		ax.KeyAsString = CompactifyKeyName(ax.KeyAsString);
+	}
+}
+
+FString URequenceDevice::CompactifyKeyName(FString InName)
+{
+	FString outName = InName;
+	outName = outName.Replace(TEXT("Gamepad "), TEXT(""));
+	outName = outName.Replace(TEXT("MotionController "), TEXT(""));
+	outName = outName.Replace(TEXT("Mouse "), TEXT(""));
+	outName = outName.Replace(TEXT("Joystick"), TEXT(""));
+	outName = outName.Replace(TEXT("stick"), TEXT("stk"));
+	outName = outName.Replace(TEXT("button"), TEXT("btn"));
+	outName = outName.Replace(TEXT("_"), TEXT(" "));
+	outName.Trim();
+	return outName;
+}
+
 bool URequenceDevice::HasActionBinding(FString ActionName, bool MustBeBound)
 {
 	for (FRequenceInputAction ac : Actions)

@@ -80,6 +80,7 @@ bool URequence::LoadUnrealInput()
 
 		//Sort it!
 		d->SortAlphabetically();
+		d->CompactifyAllKeyNames();
 	}
 
 	return true;

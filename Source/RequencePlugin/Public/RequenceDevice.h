@@ -34,6 +34,12 @@ public:
 	//Returns the device name by the set device key. Will return Unknown for unique devices.
 	static FString GetDeviceNameByType(ERequenceDeviceType DeviceType);
 
+	//Loops through all axises and actions and applies the CompactifyName function on the Action/Axis name.
+	UFUNCTION() void CompactifyAllKeyNames();
+
+	//Filters the name of an key so it's more compact.
+	UFUNCTION() FString CompactifyKeyName(FString InName);
+
 	//Check whether the provided action is already in the list.
 	UFUNCTION() bool HasActionBinding(FString ActionName, bool MustBeBound);
 
