@@ -54,12 +54,14 @@ bool URequence::LoadUnrealInput()
 		}
 	}
 
+	//todo: Separate unique device into separate devices.
+
 	//Add empty bindings so every device has all the mappings. Also sort alphabetically.
 	for (URequenceDevice* d : Devices)
 	{
 		for (FRequenceInputAction ac : Actions)
 		{
-			if (!d->HasActionBinding(ac.ActionName)) 
+			if (!d->HasActionBinding(ac.ActionName, false)) 
 			{ 
 				FRequenceInputAction newAction;
 				newAction.ActionName = ac.ActionName;
@@ -68,7 +70,7 @@ bool URequence::LoadUnrealInput()
 		}
 		for (FRequenceInputAxis ax : Axises)
 		{
-			if (!d->HasAxisBinding(ax.AxisName)) 
+			if (!d->HasAxisBinding(ax.AxisName, false)) 
 			{ 
 				FRequenceInputAxis newAxis;
 				newAxis.AxisName = ax.AxisName;
@@ -79,10 +81,6 @@ bool URequence::LoadUnrealInput()
 		//Sort it!
 		d->SortAlphabetically();
 	}
-
-	//Add Axis Config
-
-	//Separate unique device into separate devices.
 
 	return true;
 }

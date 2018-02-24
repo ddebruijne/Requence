@@ -35,10 +35,10 @@ public:
 	static FString GetDeviceNameByType(ERequenceDeviceType DeviceType);
 
 	//Check whether the provided action is already in the list.
-	UFUNCTION() bool HasActionBinding(FString ActionName);
+	UFUNCTION() bool HasActionBinding(FString ActionName, bool MustBeBound);
 
 	//Check whether the provided axis is already in the list.
-	UFUNCTION() bool HasAxisBinding(FString AxisName);
+	UFUNCTION() bool HasAxisBinding(FString AxisName, bool MustBeBound);
 
 	//Bubble sorts the actions and axises based on name.
 	UFUNCTION() void SortAlphabetically();

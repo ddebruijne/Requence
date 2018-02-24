@@ -46,25 +46,32 @@ FString URequenceDevice::GetDeviceNameByType(ERequenceDeviceType DeviceType)
 	}
 }
 
-bool URequenceDevice::HasActionBinding(FString ActionName)
+bool URequenceDevice::HasActionBinding(FString ActionName, bool MustBeBound)
 {
 	for (FRequenceInputAction ac : Actions)
 	{
 		if (ac.ActionName == ActionName) 
 		{ 
-			if (ac.Key != FKey()) { return true; }
+			if (MustBeBound)
+			{
+				if (ac.Key != FKey()) { return true; }
+			}
+			else { return true; }
 		}
 	}
 	return false;
 }
 
-bool URequenceDevice::HasAxisBinding(FString AxisName)
+bool URequenceDevice::HasAxisBinding(FString AxisName, bool MustBeBound)
 {
 	for (FRequenceInputAxis ax : Axises)
 	{
 		if (ax.AxisName == AxisName) 
 		{ 
-			if (ax.Key != FKey()) { return true; }
+			if (MustBeBound) {
+				if (ax.Key != FKey()) { return true; }
+			}
+			else { return true; }
 		}
 	}
 	return false;
@@ -144,20 +151,10 @@ bool URequenceDevice::AddAxis(FRequenceInputAxis _axis)
 	return true;
 }
 
-// bool URequenceDevice::RebindAction(FString ActionName, FKey NewKey, bool bShift = false, bool bCtrl = false, bool bAlt = false, bool bCmd = false)
-// {
-// 	return false;
-// }
-
 bool URequenceDevice::RebindAction(FRequenceInputAction UpdatedAction)
 {
 	return false;
 }
-
-// bool URequenceDevice::RebindAxis(FString AxisName, FKey NewKey, float Scale = 1.f)
-// {
-// 	return false;
-// }
 
 bool URequenceDevice::RebindAxis(FRequenceInputAxis UpdatedAxis)
 {
