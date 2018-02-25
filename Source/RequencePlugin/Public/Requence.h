@@ -4,6 +4,7 @@
 #include "GameFramework/InputSettings.h"
 #include "RequenceStructs.h"
 #include "RequenceDevice.h"
+#include "Paths.h"
 #include "Requence.generated.h"
 
 /*

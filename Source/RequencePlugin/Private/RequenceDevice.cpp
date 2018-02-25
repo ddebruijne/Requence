@@ -226,7 +226,7 @@ TSharedPtr<FJsonObject> URequenceDevice::GetDeviceAsJson()
 {
 	TSharedPtr<FJsonObject> Preset = MakeShareable(new FJsonObject);
 	Preset->SetStringField("DeviceString", DeviceString);
-	Preset->SetStringField("DeviceType", EnumToString(TEXT("ERequenceDeviceType"), DeviceType));
+	Preset->SetStringField("DeviceType", EnumToString<ERequenceDeviceType>("ERequenceDeviceType", DeviceType));
 
 	Preset->SetArrayField("Actions", GetActionsAsJson());
 	Preset->SetArrayField("Axises", GetAxisesAsJson());

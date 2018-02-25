@@ -16,7 +16,7 @@
 	"Modules": [
 		{
 			"Name": "RequencePlugin",
-			"Type": "Developer",
+			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
 	]

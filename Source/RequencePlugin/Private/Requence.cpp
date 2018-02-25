@@ -6,7 +6,6 @@
 #include "JsonWriter.h"
 #include "JsonSerializer.h"
 #include "PlatformFilemanager.h"
-#include "Paths.h"
 #include "FileHelper.h"
 
 URequence::URequence() {}
@@ -230,7 +229,7 @@ void URequence::DebugPrint(bool UseDevices = true)
 			UE_LOG(LogTemp, Log, TEXT("- Axises found: %i"), Axises.Num());
 			for (URequenceDevice* Device : Devices)
 			{
-				UE_LOG(LogTemp, Log, TEXT("- %s: %s. (Ax: %i, Ac: %i)"), *EnumToString(TEXT("ERequenceDeviceType"), Device->DeviceType), *Device->DeviceString, Device->Axises.Num(), Device->Actions.Num());
+				UE_LOG(LogTemp, Log, TEXT("- %s: %s. (Ax: %i, Ac: %i)"), *EnumToString<ERequenceDeviceType>("ERequenceDeviceType", Device->DeviceType), *Device->DeviceString, Device->Axises.Num(), Device->Actions.Num());
 
 				if (Axises.Num() > 0)
 				{

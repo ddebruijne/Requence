@@ -1,14 +1,18 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "EngineMinimal.h"
 #include "GameFramework/PlayerInput.h"
 #include "RequenceStructs.generated.h"
 
-template<typename T>
-static FString EnumToString(const FString& enumName, const T value)
+template<typename TEnum>
+static FORCEINLINE FString EnumToString(const FString& Name, TEnum Value)
 {
-	UEnum* pEnum = FindObject<UEnum>(ANY_PACKAGE, *enumName);
-	return *(pEnum ? pEnum->GetNameStringByIndex(static_cast<uint8>(value)) : "null");
+	const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, *Name, true);
+	if (!enumPtr)
+	{
+		return FString("Invalid");
+	}
+	return enumPtr->GetNameByValue((int64)Value).ToString();
 }
 
 //Device Type
