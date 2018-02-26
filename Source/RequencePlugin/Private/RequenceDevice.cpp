@@ -51,11 +51,11 @@ void URequenceDevice::CompactifyAllKeyNames()
 {
 	for (FRequenceInputAction& ac : Actions)
 	{
-		ac.KeyAsString = CompactifyKeyName(ac.KeyAsString);
+		ac.KeyString = CompactifyKeyName(ac.KeyString);
 	}
 	for (FRequenceInputAxis& ax : Axises)
 	{
-		ax.KeyAsString = CompactifyKeyName(ax.KeyAsString);
+		ax.KeyString = CompactifyKeyName(ax.KeyString);
 	}
 }
 
@@ -226,6 +226,7 @@ TSharedPtr<FJsonObject> URequenceDevice::GetDeviceAsJson()
 {
 	TSharedPtr<FJsonObject> Preset = MakeShareable(new FJsonObject);
 	Preset->SetStringField("DeviceString", DeviceString);
+	Preset->SetStringField("DeviceName", DeviceName);
 	Preset->SetStringField("DeviceType", EnumToString<ERequenceDeviceType>("ERequenceDeviceType", DeviceType));
 
 	Preset->SetArrayField("Actions", GetActionsAsJson());
@@ -268,4 +269,43 @@ TArray<TSharedPtr<FJsonValue>> URequenceDevice::GetAxisesAsJson()
 		JsonAxises.Add(AxisValue);
 	}
 	return JsonAxises;
+}
+
+void URequenceDevice::SetJsonAsActions(TArray<TSharedPtr<FJsonValue>> _Actions)
+{
+	for (int i = 0; i < _Actions.Num(); i++)
+	{
+		TSharedPtr<FJsonObject> JsonAction = _Actions[i]->AsObject();
+
+		if (JsonAction->GetStringField(TEXT("Key")) != "None")
+		{
+			FRequenceInputAction NewAction;
+			NewAction.ActionName = JsonAction->GetStringField(TEXT("ActionName"));
+			NewAction.Key = FKey(FName(*JsonAction->GetStringField(TEXT("Key"))));
+			NewAction.KeyString = CompactifyKeyName(NewAction.Key.ToString());
+			NewAction.bShift = JsonAction->GetBoolField(TEXT("bShift"));
+			NewAction.bCtrl = JsonAction->GetBoolField(TEXT("bCtrl"));
+			NewAction.bAlt = JsonAction->GetBoolField(TEXT("bAlt"));
+			NewAction.bCmd = JsonAction->GetBoolField(TEXT("bCmd"));
+			Actions.Add(NewAction);
+		}
+	}
+}
+
+void URequenceDevice::SetJsonAsAxises(TArray<TSharedPtr<FJsonValue>> _Axises)
+{
+	for (int i = 0; i < _Axises.Num(); i++)
+	{
+		TSharedPtr<FJsonObject> JsonAxis = _Axises[i]->AsObject();
+
+		if (JsonAxis->GetStringField(TEXT("Key")) != "None")
+		{
+			FRequenceInputAxis NewAxis;
+			NewAxis.AxisName = JsonAxis->GetStringField(TEXT("AxisName"));
+			NewAxis.Key = FKey(FName(*JsonAxis->GetStringField(TEXT("Key"))));
+			NewAxis.KeyString = CompactifyKeyName(NewAxis.Key.ToString());
+			NewAxis.Scale = JsonAxis->GetNumberField(TEXT("Scale"));
+			Axises.Add(NewAxis);
+		}
+	}
 }

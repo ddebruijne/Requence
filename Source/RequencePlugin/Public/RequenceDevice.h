@@ -78,4 +78,10 @@ public:
 	//Retrieves axis bindings as JSON array
 	TArray<TSharedPtr<FJsonValue>> GetAxisesAsJson();
 
+	//Parses and adds actions in JSON format to this device.
+	void SetJsonAsActions(TArray<TSharedPtr<FJsonValue>> _Actions);
+
+	//Parses and adds axises in JSON format to this device.
+	void SetJsonAsAxises(TArray<TSharedPtr<FJsonValue>> _Axises);
+
 };

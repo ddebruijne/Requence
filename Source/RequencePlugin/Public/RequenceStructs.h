@@ -15,6 +15,17 @@ static FORCEINLINE FString EnumToString(const FString& Name, TEnum Value)
 	return enumPtr->GetNameByValue((int64)Value).ToString();
 }
 
+template <typename EnumType>
+static FORCEINLINE EnumType StringToEnum(const FString& EnumName, const FString& String)
+{
+	UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, *EnumName, true);
+	if (!Enum)
+	{
+		return EnumType(0);
+	}
+	return (EnumType)Enum->GetValueByName(FName(*String));
+}
+
 //Device Type
 UENUM(BlueprintType)
 enum class ERequenceDeviceType : uint8
@@ -34,7 +45,7 @@ struct FRequenceInputAction
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString ActionName = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString KeyAsString = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString KeyString = "";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FKey Key;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	uint32 bShift : 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	uint32 bCtrl : 1;
@@ -43,13 +54,13 @@ public:
 
 	FRequenceInputAction() {}
 	FRequenceInputAction(const FString InActionName, const FKey InKey, const bool bInShift, const bool bInCtrl, const bool bInAlt, const bool bInCmd)
-		: Key(InKey), KeyAsString(Key.GetDisplayName().ToString()), bShift(bInShift), bCtrl(bInCtrl), bAlt(bInAlt), bCmd(bInCmd)
+		: Key(InKey), KeyString(Key.GetDisplayName().ToString()), bShift(bInShift), bCtrl(bInCtrl), bAlt(bInAlt), bCmd(bInCmd)
 	{
 		ActionName = InActionName;
 	}
 
 	FRequenceInputAction(const FInputActionKeyMapping& Action)
-		: Key(Action.Key), KeyAsString(Action.Key.GetDisplayName().ToString()), bShift(Action.bShift), bCtrl(Action.bCtrl), bAlt(Action.bAlt), bCmd(Action.bCmd)
+		: Key(Action.Key), KeyString(Action.Key.GetDisplayName().ToString()), bShift(Action.bShift), bCtrl(Action.bCtrl), bAlt(Action.bAlt), bCmd(Action.bCmd)
 	{
 		ActionName = Action.ActionName.ToString();
 	}
@@ -62,17 +73,17 @@ struct FRequenceInputAxis
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString AxisName = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString KeyAsString = "";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString KeyString = "";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FKey Key;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	float Scale = 1;
 
 	FRequenceInputAxis() {}
 	FRequenceInputAxis(const FString InAxisName, FKey InKey, float InScale)
-		: AxisName(InAxisName), KeyAsString(InKey.GetDisplayName().ToString()), Key(InKey), Scale(InScale)
+		: AxisName(InAxisName), KeyString(InKey.GetDisplayName().ToString()), Key(InKey), Scale(InScale)
 	{ }
 
 	FRequenceInputAxis(const FInputAxisKeyMapping& Axis)
-		: Key(Axis.Key), KeyAsString(Axis.Key.GetDisplayName().ToString()), Scale(Axis.Scale)
+		: Key(Axis.Key), KeyString(Axis.Key.GetDisplayName().ToString()), Scale(Axis.Scale)
 	{
 		AxisName = Axis.AxisName.ToString();
 	}

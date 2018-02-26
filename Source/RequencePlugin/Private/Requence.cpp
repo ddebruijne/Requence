@@ -25,7 +25,7 @@ bool URequence::LoadUnrealInput()
 		Actions.Add(FRIAc);
 
  		//Grab device
-		ERequenceDeviceType erdt = URequenceDevice::GetDeviceTypeByKeyString(FRIAc.KeyAsString);
+		ERequenceDeviceType erdt = URequenceDevice::GetDeviceTypeByKeyString(FRIAc.KeyString);
 		URequenceDevice* device = GetDeviceByType(erdt);
 		if (IsValid(device)) 
 		{	//Add to current device
@@ -33,7 +33,7 @@ bool URequence::LoadUnrealInput()
 		} 
 		else
 		{	//Create new device and add key.
-			device = CreateDevice(FRIAc.KeyAsString);
+			device = CreateDevice(FRIAc.KeyString);
 			device->AddAction(FRIAc);
 		}
 	}
@@ -46,7 +46,7 @@ bool URequence::LoadUnrealInput()
 		Axises.Add(FRIAx);
 
 		//Grab device
-		ERequenceDeviceType erdt = URequenceDevice::GetDeviceTypeByKeyString(FRIAx.KeyAsString);
+		ERequenceDeviceType erdt = URequenceDevice::GetDeviceTypeByKeyString(FRIAx.KeyString);
 		URequenceDevice* device = GetDeviceByType(erdt);
 		if (IsValid(device))
 		{	//Add to current device
@@ -54,7 +54,7 @@ bool URequence::LoadUnrealInput()
 		}
 		else
 		{	//Create new device and add key.
-			device = CreateDevice(FRIAx.KeyAsString);
+			device = CreateDevice(FRIAx.KeyString);
 			device->AddAxis(FRIAx);
 		}
 	}
@@ -64,24 +64,7 @@ bool URequence::LoadUnrealInput()
 	//Add empty bindings so every device has all the mappings. Also sort alphabetically.
 	for (URequenceDevice* d : Devices)
 	{
-		for (FRequenceInputAction ac : Actions)
-		{
-			if (!d->HasActionBinding(ac.ActionName, false)) 
-			{ 
-				FRequenceInputAction newAction;
-				newAction.ActionName = ac.ActionName;
-				d->Actions.Add(newAction);
-			}
-		}
-		for (FRequenceInputAxis ax : Axises)
-		{
-			if (!d->HasAxisBinding(ax.AxisName, false)) 
-			{ 
-				FRequenceInputAxis newAxis;
-				newAxis.AxisName = ax.AxisName;
-				d->Axises.Add(newAxis);
-			}
-		}
+		AddAllEmpty(d);
 
 		//Sort it!
 		d->SortAlphabetically();
@@ -151,9 +134,9 @@ void URequence::ExportDeviceAsPreset(URequenceDevice* Device)
 	bool bAllowOverwriting = true;
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
-	if (PlatformFile.CreateDirectoryTree(*GetPresetExportFilePath()))
+	if (PlatformFile.CreateDirectoryTree(*GetDefaultPresetFilePath()))
 	{
-		FString AbsolutePath = GetPresetExportFilePath() + FileName;
+		FString AbsolutePath = GetDefaultPresetFilePath() + FileName;
 
 		if (bAllowOverwriting || !PlatformFile.FileExists(*AbsolutePath))
 		{
@@ -163,9 +146,53 @@ void URequence::ExportDeviceAsPreset(URequenceDevice* Device)
 	}
 }
 
-bool URequence::ImportDeviceAsPreset(FString FileName)
+bool URequence::ImportDeviceAsPreset(FString AbsolutePath)
 {
+	//Load in our file
+	FString InputString;
+	if (FFileHelper::LoadFileToString(InputString, *AbsolutePath))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Requence is trying to import %s"), *AbsolutePath);
+
+		//Deserialize JSON
+		TSharedPtr<FJsonObject> JsonDevice;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InputString);
+
+		if (FJsonSerializer::Deserialize(Reader, JsonDevice))
+		{
+			FString sDeviceType;
+			if (JsonDevice->TryGetStringField(TEXT("DeviceType"), sDeviceType))
+			{
+				URequenceDevice* NewDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+				NewDevice->DeviceType = StringToEnum<ERequenceDeviceType>("ERequenceDeviceType", sDeviceType);
+				NewDevice->DeviceName = JsonDevice->GetStringField(TEXT("DeviceName"));
+				NewDevice->DeviceString = JsonDevice->GetStringField(TEXT("DeviceString"));
+				NewDevice->SetJsonAsActions(JsonDevice->GetArrayField(TEXT("Actions")));
+				NewDevice->SetJsonAsAxises(JsonDevice->GetArrayField(TEXT("Axises")));
+				AddAllEmpty(NewDevice);
+				NewDevice->SortAlphabetically();
+
+				//Out with the old, in with the new.
+				if (GetDeviceByType(NewDevice->DeviceType))
+				{
+					Devices.Remove(GetDeviceByType(NewDevice->DeviceType));
+				}
+				Devices.Add(NewDevice);
+
+				UE_LOG(LogTemp, Log, TEXT("Requence imported %s"), *NewDevice->DeviceName);
+				return true;
+			}
+		}
+	}
 	return false;
+}
+
+TArray<FString> URequence::GetImportableDevicePresets()
+{
+	IFileManager& fm = IFileManager::Get();
+	TArray<FString> toReturn;
+	fm.FindFiles(toReturn, *GetDefaultPresetFilePath(), TEXT("json"));
+	return toReturn;
 }
 
 URequenceDevice* URequence::GetDeviceByString(FString DeviceName)
@@ -217,6 +244,28 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 	return nullptr;
 }
 
+void URequence::AddAllEmpty(URequenceDevice* Device)
+{
+	for (FRequenceInputAction ac : Actions)
+	{
+		if (!Device->HasActionBinding(ac.ActionName, false))
+		{
+			FRequenceInputAction newAction;
+			newAction.ActionName = ac.ActionName;
+			Device->Actions.Add(newAction);
+		}
+	}
+	for (FRequenceInputAxis ax : Axises)
+	{
+		if (!Device->HasAxisBinding(ax.AxisName, false))
+		{
+			FRequenceInputAxis newAxis;
+			newAxis.AxisName = ax.AxisName;
+			Device->Axises.Add(newAxis);
+		}
+	}
+}
+
 void URequence::DebugPrint(bool UseDevices = true)
 {
 	UE_LOG(LogTemp, Log, TEXT("Requence Debug Print:"));
@@ -231,18 +280,18 @@ void URequence::DebugPrint(bool UseDevices = true)
 			{
 				UE_LOG(LogTemp, Log, TEXT("- %s: %s. (Ax: %i, Ac: %i)"), *EnumToString<ERequenceDeviceType>("ERequenceDeviceType", Device->DeviceType), *Device->DeviceString, Device->Axises.Num(), Device->Actions.Num());
 
-				if (Axises.Num() > 0)
+				if (Device->Axises.Num() > 0)
 				{
 					for (FRequenceInputAxis ax : Device->Axises)
 					{
-						UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.KeyAsString);
+						UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s : %f)"), *ax.AxisName, *ax.KeyString, ax.Scale);
 					}
 				}
-				if (Actions.Num() > 0)
+				if (Device->Actions.Num() > 0)
 				{
 					for (FRequenceInputAction ac : Device->Actions)
 					{
-						UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyAsString);
+						UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyString);
 					}
 				}
 			}
@@ -259,7 +308,7 @@ void URequence::DebugPrint(bool UseDevices = true)
 			UE_LOG(LogTemp, Log, TEXT("- Axises found: %i"), Axises.Num());
 			for (FRequenceInputAxis ax : Axises)
 			{
-				UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.KeyAsString);
+				UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.KeyString);
 			}
 		}
 		else { UE_LOG(LogTemp, Log, TEXT("- No Axises found!")); }
@@ -268,7 +317,7 @@ void URequence::DebugPrint(bool UseDevices = true)
 			UE_LOG(LogTemp, Log, TEXT("- Actions found: %i"), Actions.Num());
 			for (FRequenceInputAction ac : Actions)
 			{
-				UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyAsString);
+				UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyString);
 			}
 		}
 		else { UE_LOG(LogTemp, Log, TEXT("- No Actions found!")); }
