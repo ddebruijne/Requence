@@ -43,13 +43,13 @@ public:
 	UFUNCTION() FString CompactifyKeyName(FString InName);
 
 	//Check whether the provided action is already in the list.
-	UFUNCTION() bool HasActionBinding(FString ActionName, bool MustBeBound);
+	UFUNCTION(BlueprintCallable) bool HasActionBinding(FString ActionName, bool MustBeBound);
 
 	//Check whether the provided axis is already in the list.
-	UFUNCTION() bool HasAxisBinding(FString AxisName, bool MustBeBound);
+	UFUNCTION(BlueprintCallable) bool HasAxisBinding(FString AxisName, bool MustBeBound);
 
 	//Bubble sorts the actions and axises based on name.
-	UFUNCTION() void SortAlphabetically();
+	UFUNCTION(BlueprintCallable) void SortAlphabetically();
 
 	//Adds a new action to this device. Checks for doubles. returns success.
 	UFUNCTION() bool AddAction(FRequenceInputAction _action);
@@ -57,11 +57,11 @@ public:
 	//Adds a new axis to this device. Checks for doubles. returns success.
 	UFUNCTION() bool AddAxis(FRequenceInputAxis _axis);
 
-	//Rebinds action.
-	UFUNCTION() bool RebindAction(FRequenceInputAction UpdatedAction);
+	//Rebinds action. ActionName must be the same. returns success.
+	UFUNCTION(BlueprintCallable) bool RebindAction(FRequenceInputAction UpdatedAction);
 
-	//Rebinds Axis
-	UFUNCTION() bool RebindAxis(FRequenceInputAxis UpdatedAxis);
+	//Rebinds Axis. AxisName must be the same. returns success.
+	UFUNCTION(BlueprintCallable) bool RebindAxis(FRequenceInputAxis UpdatedAxis);
 
 	//Deletes action by string. returns success.
 	UFUNCTION() bool DeleteAction(FString ActionName);

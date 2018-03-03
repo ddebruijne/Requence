@@ -83,7 +83,7 @@ public:
 	UFUNCTION(BlueprintCallable)	void DebugPrint(bool UseDevices);
 
 	//Clears all devices, axises and actions.
-	UFUNCTION()						void ClearDevicesAndAxises();
+	UFUNCTION(BlueprintCallable)	void ClearDevicesAndAxises();
 
 	//Check whether one of our actions/axises were updated
 	UFUNCTION(BlueprintCallable)	bool HasUpdated();

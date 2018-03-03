@@ -180,11 +180,71 @@ bool URequenceDevice::AddAxis(FRequenceInputAxis _axis)
 
 bool URequenceDevice::RebindAction(FRequenceInputAction UpdatedAction)
 {
+	if (DeviceType == GetDeviceTypeByKeyString(UpdatedAction.Key.ToString()))
+	{
+		int toChange = -1;
+		for (int i = 0; i < Actions.Num(); i++)
+		{
+			if (Actions[i].ActionName == UpdatedAction.ActionName)
+			{
+				toChange = i;
+				break;
+			}
+		}
+
+		//Outside of for loop since we shouldn't modify a loop while iterating over it. Even though it *should* be safe.
+		if (toChange > 0)
+		{
+			Actions.RemoveAt(toChange, 1, false);
+			FRequenceInputAction a = UpdatedAction;
+			a.KeyString = CompactifyKeyName(a.Key.ToString());
+			Actions.Insert(a, toChange);
+			Updated = true;
+			return true;
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Requence did not bind a %s key to a %s device!"),
+			*EnumToString<ERequenceDeviceType>("ERequenceDeviceType", GetDeviceTypeByKeyString(UpdatedAction.Key.ToString())),
+			*EnumToString<ERequenceDeviceType>("ERequenceDeviceType", DeviceType)
+		);
+	}
 	return false;
 }
 
 bool URequenceDevice::RebindAxis(FRequenceInputAxis UpdatedAxis)
 {
+	if (DeviceType == GetDeviceTypeByKeyString(UpdatedAxis.Key.ToString()))
+	{
+		int toChange = -1;
+		for (int i = 0; i < Axises.Num(); i++)
+		{
+			if (Axises[i].AxisName == UpdatedAxis.AxisName)
+			{
+				toChange = i;
+				break;
+			}
+		}
+
+		//Outside of for loop since we shouldn't modify a loop while iterating over it. Even though it *should* be safe.
+		if (toChange > 0)
+		{
+			Axises.RemoveAt(toChange, 1, false);
+			FRequenceInputAxis a = UpdatedAxis;
+			a.KeyString = CompactifyKeyName(a.Key.ToString());
+			Axises.Insert(a, toChange);
+			Updated = true;
+			return true;
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Requence did not bind a %s key to a %s device!"),
+			*EnumToString<ERequenceDeviceType>("ERequenceDeviceType", GetDeviceTypeByKeyString(UpdatedAxis.Key.ToString())),
+			*EnumToString<ERequenceDeviceType>("ERequenceDeviceType", DeviceType)
+		);
+	}
 	return false;
 }
 

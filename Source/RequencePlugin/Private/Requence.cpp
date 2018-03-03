@@ -74,7 +74,7 @@ bool URequence::LoadUnrealInput()
 	return true;
 }
 
-bool URequence::SaveUnrealInput(bool Force = false)
+bool URequence::SaveUnrealInput(bool Force)
 {
 	UInputSettings* Settings = GetMutableDefault<UInputSettings>();
 	if (!Settings) { return false; }
@@ -116,6 +116,11 @@ bool URequence::SaveUnrealInput(bool Force = false)
 		}
 
 		Settings->SaveKeyMappings();
+
+		for (TObjectIterator<UPlayerInput> It; It; ++It)
+		{
+			It->ForceRebuildingKeyMaps(true);
+		}
 		return true;
 	}
 
