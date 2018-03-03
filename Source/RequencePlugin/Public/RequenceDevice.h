@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "RequenceStructs.h"
+#include "RequenceSaveObject.h"
 #include "JsonValue.h"
 #include "RequenceDevice.generated.h"
 
@@ -29,6 +30,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Updated = false;
 
 	URequenceDevice();
+
+	void FromStruct(FRequenceSaveObjectDevice StructIn);
+
+	FRequenceSaveObjectDevice ToStruct();
 
 	//Returns the device type by a bound key
 	static ERequenceDeviceType GetDeviceTypeByKeyString(FString KeyString);

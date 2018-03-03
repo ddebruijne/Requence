@@ -59,6 +59,16 @@ bool URequence::LoadUnrealInput()
 		}
 	}
 
+	//Fill FullAxis/ActionList
+	for (FRequenceInputAxis ax : Axises)
+	{
+		if (!FullAxisList.Contains(ax.AxisName)) { FullAxisList.Add(ax.AxisName); }
+	}
+	for (FRequenceInputAction ac : Actions)
+	{
+		if (!FullActionList.Contains(ac.ActionName)) { FullActionList.Add(ac.ActionName); }
+	}
+
 	//todo: Separate unique device into separate devices.
 
 	//Add empty bindings so every device has all the mappings. Also sort alphabetically.
@@ -124,6 +134,57 @@ bool URequence::SaveUnrealInput(bool Force)
 		return true;
 	}
 
+	return false;
+}
+
+bool URequence::LoadInput(bool ForceDefault)
+{
+	ClearDevicesAndAxises();
+
+	//If we don't have a save file we didn't change anything, so there's no need to load in the savefile. just roll with the OG!
+	URequenceSaveObject* RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::CreateSaveGameObject(URequenceSaveObject::StaticClass()));
+	if (!UGameplayStatics::DoesSaveGameExist(RSO_Instance->SaveSlotName, RSO_Instance->UserIndex) || ForceDefault)
+	{
+		if (LoadUnrealInput()) { return SaveInput(); }
+	} 
+	else
+	{
+		RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::LoadGameFromSlot(RSO_Instance->SaveSlotName, RSO_Instance->UserIndex));
+		if (RSO_Instance->Devices.Num() > 0)
+		{
+			FullAxisList = RSO_Instance->FullAxisList;
+			FullActionList = RSO_Instance->FullActionList;
+			for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
+			{
+				URequenceDevice* newDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+				newDevice->FromStruct(SavedDevice);
+				Devices.Add(newDevice);
+			}
+			if (Devices.Num() > 0) { return true; }
+		}
+	}
+
+	return false;
+}
+
+bool URequence::SaveInput()
+{
+	URequenceSaveObject* RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::CreateSaveGameObject(URequenceSaveObject::StaticClass()));
+	RSO_Instance->FullActionList = FullActionList;
+	RSO_Instance->FullAxisList = FullAxisList;
+	for (URequenceDevice* Device : Devices)
+	{
+		RSO_Instance->Devices.Add(Device->ToStruct());
+	}
+	if (RSO_Instance->Devices.Num() > 0)
+	{
+		return UGameplayStatics::SaveGameToSlot(RSO_Instance, RSO_Instance->SaveSlotName, RSO_Instance->UserIndex);
+	}
+	return false;
+}
+
+bool URequence::ApplyAxisesAndActions()
+{
 	return false;
 }
 
@@ -251,21 +312,21 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 
 void URequence::AddAllEmpty(URequenceDevice* Device)
 {
-	for (FRequenceInputAction ac : Actions)
+	for (FString ac : FullActionList)
 	{
-		if (!Device->HasActionBinding(ac.ActionName, false))
+		if (!Device->HasActionBinding(ac, false))
 		{
 			FRequenceInputAction newAction;
-			newAction.ActionName = ac.ActionName;
+			newAction.ActionName = ac;
 			Device->Actions.Add(newAction);
 		}
 	}
-	for (FRequenceInputAxis ax : Axises)
+	for (FString ax : FullAxisList)
 	{
-		if (!Device->HasAxisBinding(ax.AxisName, false))
+		if (!Device->HasAxisBinding(ax, false))
 		{
 			FRequenceInputAxis newAxis;
-			newAxis.AxisName = ax.AxisName;
+			newAxis.AxisName = ax;
 			Device->Axises.Add(newAxis);
 		}
 	}
@@ -289,14 +350,14 @@ void URequence::DebugPrint(bool UseDevices = true)
 				{
 					for (FRequenceInputAxis ax : Device->Axises)
 					{
-						UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s : %f)"), *ax.AxisName, *ax.KeyString, ax.Scale);
+						UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s : %f)"), *ax.AxisName, *ax.Key.ToString(), ax.Scale);
 					}
 				}
 				if (Device->Actions.Num() > 0)
 				{
 					for (FRequenceInputAction ac : Device->Actions)
 					{
-						UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyString);
+						UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.Key.ToString());
 					}
 				}
 			}
@@ -313,7 +374,7 @@ void URequence::DebugPrint(bool UseDevices = true)
 			UE_LOG(LogTemp, Log, TEXT("- Axises found: %i"), Axises.Num());
 			for (FRequenceInputAxis ax : Axises)
 			{
-				UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.KeyString);
+				UE_LOG(LogTemp, Log, TEXT("  * Axis %s (%s)"), *ax.AxisName, *ax.Key.ToString());
 			}
 		}
 		else { UE_LOG(LogTemp, Log, TEXT("- No Axises found!")); }
@@ -322,7 +383,7 @@ void URequence::DebugPrint(bool UseDevices = true)
 			UE_LOG(LogTemp, Log, TEXT("- Actions found: %i"), Actions.Num());
 			for (FRequenceInputAction ac : Actions)
 			{
-				UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.KeyString);
+				UE_LOG(LogTemp, Log, TEXT("  * Action %s (%s)"), *ac.ActionName, *ac.Key.ToString());
 			}
 		}
 		else { UE_LOG(LogTemp, Log, TEXT("- No Actions found!")); }
@@ -334,6 +395,8 @@ void URequence::ClearDevicesAndAxises()
 	Actions.Empty();
 	Axises.Empty();
 	Devices.Empty();
+	FullAxisList.Empty();
+	FullActionList.Empty();
 }
 
 bool URequence::HasUpdated()

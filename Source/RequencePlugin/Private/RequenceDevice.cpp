@@ -7,6 +7,26 @@ URequenceDevice::URequenceDevice()
 {
 }
 
+void URequenceDevice::FromStruct(FRequenceSaveObjectDevice StructIn)
+{
+	DeviceString = StructIn.DeviceString;
+	DeviceName = StructIn.DeviceName;
+	DeviceType = StructIn.DeviceType;
+	Actions = StructIn.Actions;
+	Axises = StructIn.Axises;
+}
+
+FRequenceSaveObjectDevice URequenceDevice::ToStruct()
+{
+	FRequenceSaveObjectDevice toReturn;
+	toReturn.DeviceString = DeviceString;
+	toReturn.DeviceName = DeviceName;
+	toReturn.DeviceType = DeviceType;
+	toReturn.Actions = Actions;
+	toReturn.Axises = Axises;
+	return toReturn;
+}
+
 ERequenceDeviceType URequenceDevice::GetDeviceTypeByKeyString(FString KeyString)
 {
 	if (KeyString.Contains("Mouse")) { return ERequenceDeviceType::RDT_Mouse; }
