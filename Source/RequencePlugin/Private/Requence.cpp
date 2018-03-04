@@ -161,6 +161,8 @@ bool URequence::LoadInput(bool ForceDefault)
 				Devices.Add(newDevice);
 			}
 			if (Devices.Num() > 0) { return true; }
+
+			//todo: Check for added or removed actions/axies from UnrealInput file.
 		}
 	}
 
@@ -183,8 +185,52 @@ bool URequence::SaveInput()
 	return false;
 }
 
-bool URequence::ApplyAxisesAndActions()
+bool URequence::ApplyAxisesAndActions(bool Force)
 {
+	UInputSettings* Settings = GetMutableDefault<UInputSettings>();
+	if (!Settings) { return false; }
+
+	if (HasUpdated() || Force)
+	{
+		//Todo: Store a backup of these mappings - only empty them after the fact when its safe.
+		Settings->ActionMappings.Empty();
+		Settings->AxisMappings.Empty();
+
+		for (URequenceDevice* d : Devices)
+		{
+			for (FRequenceInputAction ac : d->Actions)
+			{
+				if (ac.Key != FKey())
+				{
+					FInputActionKeyMapping NewAction;
+					NewAction.ActionName = FName(*ac.ActionName);
+					NewAction.Key = ac.Key;
+					NewAction.bShift = ac.bShift;
+					NewAction.bCtrl = ac.bCmd;
+					NewAction.bAlt = ac.bAlt;
+					NewAction.bCmd = ac.bCmd;
+					Settings->ActionMappings.Add(NewAction);
+				}
+			}
+
+			for (FRequenceInputAxis ax : d->Axises)
+			{
+				if (ax.Key != FKey())
+				{
+					FInputAxisKeyMapping NewAxis;
+					NewAxis.AxisName = FName(*ax.AxisName);
+					NewAxis.Key = ax.Key;
+					NewAxis.Scale = ax.Scale;
+					Settings->AxisMappings.Add(NewAxis);
+				}
+			}
+		}
+		for (TObjectIterator<UPlayerInput> It; It; ++It)
+		{
+			It->ForceRebuildingKeyMaps(true);
+		}
+		return true;
+	}
 	return false;
 }
 

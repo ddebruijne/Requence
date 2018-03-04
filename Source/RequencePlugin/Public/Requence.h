@@ -34,11 +34,11 @@ public:
 
 	//All loaded actions
 	UPROPERTY(BlueprintReadOnly)	TArray<FRequenceInputAction>	Actions;
-	
+private:
 	//All Unreal loaded axises. Don't use this por favor.
-	UPROPERTY()	TArray<FRequenceInputAxis>	Axises;		
-	UPROPERTY()	TArray<URequenceDevice*>	Devices;
-
+	UPROPERTY()						TArray<FRequenceInputAxis>	Axises;		
+	UPROPERTY()						TArray<URequenceDevice*>	Devices;
+public:
 	UPROPERTY(BlueprintReadOnly)	TArray<FString> FullAxisList;
 	UPROPERTY(BlueprintReadOnly)	TArray<FString> FullActionList;
 
@@ -48,10 +48,10 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 	//Converts Unreals' Input.ini to our format. Returns false if failed.
-	UFUNCTION()	bool LoadUnrealInput();	
+	UFUNCTION()						bool LoadUnrealInput();	
 
 	//Places our format safely back as Input.ini. Returns false if failed. Note that this function should be avoided and use the Requence save file.
-	UFUNCTION()	bool SaveUnrealInput(bool Force);		
+	UFUNCTION()						bool SaveUnrealInput(bool Force);		
 
 	//Load in Requence save file. If it does not exist (since nothing is customized) we load in UE4's Defaults. Returns success. If ForceDefault is true all devices will be reset to their default bindings.
 	UFUNCTION(BlueprintCallable)	bool LoadInput(bool ForceDefault);
@@ -60,7 +60,7 @@ public:
 	UFUNCTION(BlueprintCallable)	bool SaveInput();
 
 	//Apply axises and actions set in Devices to the temporary UE4 input so we can use them in this session.
-	UFUNCTION()						bool ApplyAxisesAndActions();
+	UFUNCTION(BlueprintCallable)	bool ApplyAxisesAndActions(bool Force);
 
 
 	//////////////////////////////////////////////////////////////////////////

@@ -213,7 +213,7 @@ bool URequenceDevice::RebindAction(FRequenceInputAction UpdatedAction)
 		}
 
 		//Outside of for loop since we shouldn't modify a loop while iterating over it. Even though it *should* be safe.
-		if (toChange > 0)
+		if (toChange >= 0)
 		{
 			Actions.RemoveAt(toChange, 1, false);
 			FRequenceInputAction a = UpdatedAction;
@@ -248,7 +248,7 @@ bool URequenceDevice::RebindAxis(FRequenceInputAxis UpdatedAxis)
 		}
 
 		//Outside of for loop since we shouldn't modify a loop while iterating over it. Even though it *should* be safe.
-		if (toChange > 0)
+		if (toChange >= 0)
 		{
 			Axises.RemoveAt(toChange, 1, false);
 			FRequenceInputAxis a = UpdatedAxis;
