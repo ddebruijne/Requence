@@ -234,6 +234,20 @@ bool URequence::ApplyAxisesAndActions(bool Force)
 	return false;
 }
 
+void URequence::OnGameStartup()
+{
+	if (LoadInput(false)) {
+		if (ApplyAxisesAndActions(true)) {
+			UE_LOG(LogTemp, Log, TEXT("Requence successfully conducted startup sequence!"));
+			return;
+		}
+		UE_LOG(LogTemp, Log, TEXT("Requence failed to apply axises and actions to runtime on startup!"));
+		return;
+	}
+	UE_LOG(LogTemp, Log, TEXT("Requence failed to load input from sav/UE on startup!"));
+	return;
+}
+
 void URequence::ExportDeviceAsPreset(URequenceDevice* Device)
 {
 	//Serialize JSON

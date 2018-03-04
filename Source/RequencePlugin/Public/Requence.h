@@ -62,6 +62,8 @@ public:
 	//Apply axises and actions set in Devices to the temporary UE4 input so we can use them in this session.
 	UFUNCTION(BlueprintCallable)	bool ApplyAxisesAndActions(bool Force);
 
+	//Function to run on game startup. Loads in Save game and applies custom inputs to runtime.
+	UFUNCTION(BlueprintCallable)	void OnGameStartup();
 
 	//////////////////////////////////////////////////////////////////////////
 	//Importing / Exporting 
