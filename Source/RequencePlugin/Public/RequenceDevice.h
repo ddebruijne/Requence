@@ -17,7 +17,7 @@
 *  ...
 */
 UCLASS(EditInlineNew, Meta = (BlueprintSpawnableComponent))
-class URequenceDevice : public UObject
+class REQUENCEPLUGIN_API URequenceDevice : public UObject
 {
 	GENERATED_BODY()
 
