@@ -21,7 +21,7 @@
 *  - JoystickPlugin 
 */
 UCLASS(EditInlineNew, Meta=(BlueprintSpawnableComponent))
-class URequence : public UObject
+class REQUENCEPLUGIN_API URequence : public UObject
 {
 	GENERATED_BODY()
 
