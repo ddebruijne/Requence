@@ -69,10 +69,10 @@ public:
 	UFUNCTION(BlueprintCallable) bool RebindAxis(FRequenceInputAxis UpdatedAxis);
 
 	//Deletes action by string. returns success.
-	UFUNCTION() bool DeleteAction(FString ActionName);
+	UFUNCTION(BlueprintCallable) bool DeleteAction(FString ActionName);
 
 	//Deletes axis by string. returns success.
-	UFUNCTION() bool DeleteAxis(FString AxisName);
+	UFUNCTION(BlueprintCallable) bool DeleteAxis(FString AxisName);
 
 	//Retrieves this class' data as a JSON object.
 	TSharedPtr<FJsonObject> GetDeviceAsJson();
