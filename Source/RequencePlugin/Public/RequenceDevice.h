@@ -63,10 +63,10 @@ public:
 	UFUNCTION() bool AddAxis(FRequenceInputAxis _axis);
 
 	//Rebinds action. ActionName must be the same. returns success.
-	UFUNCTION(BlueprintCallable) bool RebindAction(FRequenceInputAction UpdatedAction);
+	UFUNCTION(BlueprintCallable) bool RebindAction(FRequenceInputAction OldAction, FRequenceInputAction UpdatedAction);
 
 	//Rebinds Axis. AxisName must be the same. returns success.
-	UFUNCTION(BlueprintCallable) bool RebindAxis(FRequenceInputAxis UpdatedAxis);
+	UFUNCTION(BlueprintCallable) bool RebindAxis(FRequenceInputAxis OldAxis, FRequenceInputAxis UpdatedAxis);
 
 	//Deletes action by string. returns success.
 	UFUNCTION(BlueprintCallable) bool DeleteAction(FString ActionName);

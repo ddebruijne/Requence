@@ -198,14 +198,14 @@ bool URequenceDevice::AddAxis(FRequenceInputAxis _axis)
 	return true;
 }
 
-bool URequenceDevice::RebindAction(FRequenceInputAction UpdatedAction)
+bool URequenceDevice::RebindAction(FRequenceInputAction OldAction, FRequenceInputAction UpdatedAction)
 {
 	if (DeviceType == GetDeviceTypeByKeyString(UpdatedAction.Key.ToString()))
 	{
 		int toChange = -1;
 		for (int i = 0; i < Actions.Num(); i++)
 		{
-			if (Actions[i].ActionName == UpdatedAction.ActionName)
+			if (Actions[i].ActionName == OldAction.ActionName && Actions[i].Key == OldAction.Key)
 			{
 				toChange = i;
 				break;
@@ -233,14 +233,14 @@ bool URequenceDevice::RebindAction(FRequenceInputAction UpdatedAction)
 	return false;
 }
 
-bool URequenceDevice::RebindAxis(FRequenceInputAxis UpdatedAxis)
+bool URequenceDevice::RebindAxis(FRequenceInputAxis OldAxis, FRequenceInputAxis UpdatedAxis)
 {
 	if (DeviceType == GetDeviceTypeByKeyString(UpdatedAxis.Key.ToString()))
 	{
 		int toChange = -1;
 		for (int i = 0; i < Axises.Num(); i++)
 		{
-			if (Axises[i].AxisName == UpdatedAxis.AxisName)
+			if (Axises[i].AxisName == OldAxis.AxisName && Axises[i].Key == OldAxis.Key)
 			{
 				toChange = i;
 				break;
