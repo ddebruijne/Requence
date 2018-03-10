@@ -156,6 +156,63 @@ bool URequenceDevice::StartEditMode()
 	return false;
 }
 
+void URequenceDevice::AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList)
+{
+	for (FString ac : FullActionList)
+	{
+		if (!HasActionBinding(ac, false))
+		{
+			FRequenceInputAction newAction;
+			newAction.ActionName = ac;
+			Actions.Add(newAction);
+		}
+	}
+	for (FString ax : FullAxisList)
+	{
+		if (!HasAxisBinding(ax, false))
+		{
+			FRequenceInputAxis newAxis;
+			newAxis.AxisName = ax;
+			Axises.Add(newAxis);
+		}
+	}
+}
+
+bool URequenceDevice::FilterDeleted(TArray<FString> FullAxisList, TArray<FString> FullActionList)
+{
+	int deleted = 0;
+	if (Actions.Num() > 0)
+	{
+		for (int i = Actions.Num() - 1; i >= 0; i--)
+		{
+			if (!FullActionList.Contains(Actions[i].ActionName))
+			{
+				Actions.RemoveAt(i);
+				deleted++;
+			}
+		}
+	}
+
+	if (Axises.Num() > 0)
+	{
+		for (int i = Axises.Num() - 1; i >= 0; i--)
+		{
+			if (!FullAxisList.Contains(Axises[i].AxisName))
+			{
+				Axises.RemoveAt(i);
+				deleted++;
+			}
+		}
+	}
+
+	if (deleted > 0) 
+	{
+		Updated = true;
+		return true;
+	}
+	return false;
+}
+
 bool URequenceDevice::AddAction(FRequenceInputAction _action)
 {
 	//Check for duplicates.
@@ -295,7 +352,8 @@ bool URequenceDevice::DeleteAxis(FString AxisName)
 	return false;
 }
 
-void URequenceDevice::FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef)
+void URequenceDevice::FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef, 
+	TArray<FString> FullAxisList, TArray<FString> FullActionList)
 {
 	DeviceString = StructIn.DeviceString;
 	DeviceName = StructIn.DeviceName;
@@ -303,6 +361,10 @@ void URequenceDevice::FromStruct(FRequenceSaveObjectDevice StructIn, URequence* 
 	Actions = StructIn.Actions;
 	Axises = StructIn.Axises;
 	RequenceRef = _RequenceRef;
+
+	AddAllEmpty(FullAxisList, FullActionList);
+	FilterDeleted(FullAxisList, FullActionList);
+	SortAlphabetically();
 }
 
 FRequenceSaveObjectDevice URequenceDevice::ToStruct()
@@ -313,6 +375,31 @@ FRequenceSaveObjectDevice URequenceDevice::ToStruct()
 	toReturn.DeviceType = DeviceType;
 	toReturn.Actions = Actions;
 	toReturn.Axises = Axises;
+
+	//Filter empty keys
+	if (toReturn.Actions.Num() > 0)
+	{
+		for (int i = toReturn.Actions.Num() - 1; i >= 0; i--)
+		{
+			if (toReturn.Actions[i].Key == FKey())
+			{
+				toReturn.Actions.RemoveAt(i);
+			}
+		}
+	}
+
+	//Filter empty keys
+	if (toReturn.Axises.Num() > 0)
+	{
+		for (int i = toReturn.Axises.Num() - 1; i >= 0; i--)
+		{
+			if (toReturn.Axises[i].Key == FKey())
+			{
+				toReturn.Axises.RemoveAt(i);
+			}
+		}
+	}
+
 	return toReturn;
 }
 

@@ -59,22 +59,14 @@ bool URequence::LoadUnrealInput()
 		}
 	}
 
-	//Fill FullAxis/ActionList
-	for (FRequenceInputAxis ax : Axises)
-	{
-		if (!FullAxisList.Contains(ax.AxisName)) { FullAxisList.Add(ax.AxisName); }
-	}
-	for (FRequenceInputAction ac : Actions)
-	{
-		if (!FullActionList.Contains(ac.ActionName)) { FullActionList.Add(ac.ActionName); }
-	}
+	FillFullAxisActionLists();
 
 	//todo: Separate unique device into separate devices.
 
 	//Add empty bindings so every device has all the mappings. Also sort alphabetically.
 	for (URequenceDevice* d : Devices)
 	{
-		AddAllEmpty(d);
+		d->AddAllEmpty(FullAxisList, FullActionList);
 
 		//Sort it!
 		d->SortAlphabetically();
@@ -141,7 +133,6 @@ bool URequence::LoadInput(bool ForceDefault)
 {
 	ClearDevicesAndAxises();
 
-	//If we don't have a save file we didn't change anything, so there's no need to load in the savefile. just roll with the OG!
 	URequenceSaveObject* RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::CreateSaveGameObject(URequenceSaveObject::StaticClass()));
 	if (!UGameplayStatics::DoesSaveGameExist(RSO_Instance->SaveSlotName, RSO_Instance->UserIndex) || ForceDefault)
 	{
@@ -152,17 +143,14 @@ bool URequence::LoadInput(bool ForceDefault)
 		RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::LoadGameFromSlot(RSO_Instance->SaveSlotName, RSO_Instance->UserIndex));
 		if (RSO_Instance->Devices.Num() > 0)
 		{
-			FullAxisList = RSO_Instance->FullAxisList;
-			FullActionList = RSO_Instance->FullActionList;
+			FillFullAxisActionLists();
 			for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
 			{
 				URequenceDevice* newDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
-				newDevice->FromStruct(SavedDevice, this);
+				newDevice->FromStruct(SavedDevice, this, FullAxisList, FullActionList);
 				Devices.Add(newDevice);
 			}
 			if (Devices.Num() > 0) { return true; }
-
-			//todo: Check for added or removed actions/axies from UnrealInput file.
 		}
 	}
 
@@ -172,8 +160,6 @@ bool URequence::LoadInput(bool ForceDefault)
 bool URequence::SaveInput()
 {
 	URequenceSaveObject* RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::CreateSaveGameObject(URequenceSaveObject::StaticClass()));
-	RSO_Instance->FullActionList = FullActionList;
-	RSO_Instance->FullAxisList = FullAxisList;
 	for (URequenceDevice* Device : Devices)
 	{
 		RSO_Instance->Devices.Add(Device->ToStruct());
@@ -289,15 +275,20 @@ bool URequence::ImportDeviceAsPreset(FString AbsolutePath)
 			FString sDeviceType;
 			if (JsonDevice->TryGetStringField(TEXT("DeviceType"), sDeviceType))
 			{
+				FillFullAxisActionLists();
+
 				URequenceDevice* NewDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
 				NewDevice->DeviceType = StringToEnum<ERequenceDeviceType>("ERequenceDeviceType", sDeviceType);
 				NewDevice->DeviceName = JsonDevice->GetStringField(TEXT("DeviceName"));
 				NewDevice->DeviceString = JsonDevice->GetStringField(TEXT("DeviceString"));
 				NewDevice->SetJsonAsActions(JsonDevice->GetArrayField(TEXT("Actions")));
 				NewDevice->SetJsonAsAxises(JsonDevice->GetArrayField(TEXT("Axises")));
+
 				NewDevice->RequenceRef = this;
-				AddAllEmpty(NewDevice);
+				NewDevice->AddAllEmpty(FullAxisList, FullActionList);
+				NewDevice->FilterDeleted(FullAxisList, FullActionList);
 				NewDevice->SortAlphabetically();
+				NewDevice->Updated = true;
 
 				//Out with the old, in with the new.
 				if (GetDeviceByType(NewDevice->DeviceType))
@@ -320,6 +311,29 @@ TArray<FString> URequence::GetImportableDevicePresets()
 	TArray<FString> toReturn;
 	fm.FindFiles(toReturn, *GetDefaultPresetFilePath(), TEXT("json"));
 	return toReturn;
+}
+
+bool URequence::FillFullAxisActionLists()
+{
+	UInputSettings* Settings = GetMutableDefault<UInputSettings>();
+	if (!Settings) { return false; }
+
+	FullActionList.Empty();
+	FullAxisList.Empty();
+
+	const TArray<FInputActionKeyMapping>& _Actions = Settings->ActionMappings;
+	for (const FInputActionKeyMapping& Each : _Actions)
+	{
+		if (!FullActionList.Contains(Each.ActionName)) { FullActionList.Add(Each.ActionName); }
+	}
+
+	const TArray<FInputAxisKeyMapping>& _Axises = Settings->AxisMappings;
+	for (const FInputAxisKeyMapping& Each : _Axises)
+	{
+		if (!FullAxisList.Contains(Each.AxisName)) { FullAxisList.Add(Each.AxisName); }
+	}
+
+	return true;
 }
 
 URequenceDevice* URequence::GetDeviceByString(FString DeviceName)
@@ -370,28 +384,6 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 	}
 
 	return nullptr;
-}
-
-void URequence::AddAllEmpty(URequenceDevice* Device)
-{
-	for (FString ac : FullActionList)
-	{
-		if (!Device->HasActionBinding(ac, false))
-		{
-			FRequenceInputAction newAction;
-			newAction.ActionName = ac;
-			Device->Actions.Add(newAction);
-		}
-	}
-	for (FString ax : FullAxisList)
-	{
-		if (!Device->HasAxisBinding(ax, false))
-		{
-			FRequenceInputAxis newAxis;
-			newAxis.AxisName = ax;
-			Device->Axises.Add(newAxis);
-		}
-	}
 }
 
 void URequence::DebugPrint(bool UseDevices = true)

@@ -53,6 +53,12 @@ public:
 	//Starts edit mode for this device. returns success.
 	UFUNCTION(BlueprintCallable) bool StartEditMode();
 
+	//Adds all not-found axises and actions from the full action list.
+	UFUNCTION()	void AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList);
+
+	//Removes all actions and axises that are no longer found in the full action/axis list. returns whether axises are removed.
+	UFUNCTION() bool FilterDeleted(TArray<FString> FullAxisList, TArray<FString> FullActionList);
+
 	//////////////////////////////////////////////////////////////////////////
 	// Axis/Action manipulation
 	//////////////////////////////////////////////////////////////////////////
@@ -87,7 +93,8 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 	//Fills this device from a requence save object device.
-	void FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef);
+	void FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef,
+		TArray<FString> FullAxisList, TArray<FString> FullActionList);
 
 	//Creates a save object device from this device.
 	FRequenceSaveObjectDevice ToStruct();

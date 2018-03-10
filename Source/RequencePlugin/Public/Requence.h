@@ -109,6 +109,9 @@ public:
 	//Helper Functions
 	//////////////////////////////////////////////////////////////////////////
 
+	//Fills full axis/action list from save file.
+	UFUNCTION()						bool FillFullAxisActionLists();
+
 	//Tries to find a device by its DeviceString. Returns a nullptr when failed.
  	UFUNCTION(BlueprintCallable)	URequenceDevice* GetDeviceByString(FString DeviceString);
 
@@ -117,9 +120,6 @@ public:
 
 	//Tries to create a device by a key name. Returns a nullptr when failed.
 	UFUNCTION()						URequenceDevice* CreateDevice(FString KeyName);
-
-	//Add empty bindings so this device has all the mappings.
-	UFUNCTION()						void AddAllEmpty(URequenceDevice* Device);
 
 	//Prints all found axises and actions.
 	UFUNCTION(BlueprintCallable)	void DebugPrint(bool UseDevices);
