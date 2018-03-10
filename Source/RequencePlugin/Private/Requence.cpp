@@ -324,13 +324,15 @@ bool URequence::FillFullAxisActionLists()
 	const TArray<FInputActionKeyMapping>& _Actions = Settings->ActionMappings;
 	for (const FInputActionKeyMapping& Each : _Actions)
 	{
-		if (!FullActionList.Contains(Each.ActionName)) { FullActionList.Add(Each.ActionName); }
+		FName name = Each.ActionName;
+		if (!FullActionList.Contains(name.ToString())) { FullActionList.Add(name.ToString()); }
 	}
 
 	const TArray<FInputAxisKeyMapping>& _Axises = Settings->AxisMappings;
 	for (const FInputAxisKeyMapping& Each : _Axises)
 	{
-		if (!FullAxisList.Contains(Each.AxisName)) { FullAxisList.Add(Each.AxisName); }
+		FName name = Each.AxisName;
+		if (!FullAxisList.Contains(name.ToString())) { FullAxisList.Add(name.ToString()); }
 	}
 
 	return true;
