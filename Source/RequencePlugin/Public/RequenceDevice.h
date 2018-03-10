@@ -9,6 +9,8 @@
 #include "JsonValue.h"
 #include "RequenceDevice.generated.h"
 
+class URequence;
+
 /*
 *  Impeller Studios (2018)
 *  RequenceDevice
@@ -28,12 +30,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAction> Actions;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAxis> Axises;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Updated = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	URequence* RequenceRef;
 
 	URequenceDevice();
 
-	void FromStruct(FRequenceSaveObjectDevice StructIn);
-
-	FRequenceSaveObjectDevice ToStruct();
 
 	//Returns the device type by a bound key
 	static ERequenceDeviceType GetDeviceTypeByKeyString(FString KeyString);
@@ -47,14 +47,21 @@ public:
 	//Filters the name of an key so it's more compact.
 	UFUNCTION() FString CompactifyKeyName(FString InName);
 
+	//Bubble sorts the actions and axises based on name.
+	UFUNCTION(BlueprintCallable) void SortAlphabetically();
+
+	//Starts edit mode for this device. returns success.
+	UFUNCTION(BlueprintCallable) bool StartEditMode();
+
+	//////////////////////////////////////////////////////////////////////////
+	// Axis/Action manipulation
+	//////////////////////////////////////////////////////////////////////////
+
 	//Check whether the provided action is already in the list.
 	UFUNCTION(BlueprintCallable) bool HasActionBinding(FString ActionName, bool MustBeBound);
 
 	//Check whether the provided axis is already in the list.
 	UFUNCTION(BlueprintCallable) bool HasAxisBinding(FString AxisName, bool MustBeBound);
-
-	//Bubble sorts the actions and axises based on name.
-	UFUNCTION(BlueprintCallable) void SortAlphabetically();
 
 	//Adds a new action to this device. Checks for doubles. returns success.
 	UFUNCTION() bool AddAction(FRequenceInputAction _action);
@@ -73,6 +80,17 @@ public:
 
 	//Deletes axis by string. returns success.
 	UFUNCTION(BlueprintCallable) bool DeleteAxis(FString AxisName);
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// JSON Import/Export
+	//////////////////////////////////////////////////////////////////////////
+
+	//Fills this device from a requence save object device.
+	void FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef);
+
+	//Creates a save object device from this device.
+	FRequenceSaveObjectDevice ToStruct();
 
 	//Retrieves this class' data as a JSON object.
 	TSharedPtr<FJsonObject> GetDeviceAsJson();

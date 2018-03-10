@@ -7,26 +7,6 @@ URequenceDevice::URequenceDevice()
 {
 }
 
-void URequenceDevice::FromStruct(FRequenceSaveObjectDevice StructIn)
-{
-	DeviceString = StructIn.DeviceString;
-	DeviceName = StructIn.DeviceName;
-	DeviceType = StructIn.DeviceType;
-	Actions = StructIn.Actions;
-	Axises = StructIn.Axises;
-}
-
-FRequenceSaveObjectDevice URequenceDevice::ToStruct()
-{
-	FRequenceSaveObjectDevice toReturn;
-	toReturn.DeviceString = DeviceString;
-	toReturn.DeviceName = DeviceName;
-	toReturn.DeviceType = DeviceType;
-	toReturn.Actions = Actions;
-	toReturn.Axises = Axises;
-	return toReturn;
-}
-
 ERequenceDeviceType URequenceDevice::GetDeviceTypeByKeyString(FString KeyString)
 {
 	if (KeyString.Contains("Mouse")) { return ERequenceDeviceType::RDT_Mouse; }
@@ -167,6 +147,15 @@ void URequenceDevice::SortAlphabetically()
 	}
 }
 
+bool URequenceDevice::StartEditMode()
+{
+	if (IsValid(RequenceRef)) {
+		RequenceRef->SetEditModeStarted(DeviceType);
+		return true;
+	}
+	return false;
+}
+
 bool URequenceDevice::AddAction(FRequenceInputAction _action)
 {
 	//Check for duplicates.
@@ -304,6 +293,27 @@ bool URequenceDevice::DeleteAxis(FString AxisName)
 	}
 	if (deleted > 0) { return true; }
 	return false;
+}
+
+void URequenceDevice::FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef)
+{
+	DeviceString = StructIn.DeviceString;
+	DeviceName = StructIn.DeviceName;
+	DeviceType = StructIn.DeviceType;
+	Actions = StructIn.Actions;
+	Axises = StructIn.Axises;
+	RequenceRef = _RequenceRef;
+}
+
+FRequenceSaveObjectDevice URequenceDevice::ToStruct()
+{
+	FRequenceSaveObjectDevice toReturn;
+	toReturn.DeviceString = DeviceString;
+	toReturn.DeviceName = DeviceName;
+	toReturn.DeviceType = DeviceType;
+	toReturn.Actions = Actions;
+	toReturn.Axises = Axises;
+	return toReturn;
 }
 
 TSharedPtr<FJsonObject> URequenceDevice::GetDeviceAsJson()

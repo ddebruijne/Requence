@@ -9,6 +9,9 @@
 #include "Paths.h"
 #include "Requence.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRequenceOnEditModeStarted, ERequenceDeviceType, DeviceType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRequenceOnEditModeEnded);
+
 /*
 *  Impeller Studios (2018)
 *  Requence
@@ -37,22 +40,44 @@ public:
 private:
 	//All Unreal loaded axises. Don't use this por favor.
 	UPROPERTY()						TArray<FRequenceInputAxis>	Axises;		
+
+	//All Unreal loaded actions. Don't use this por favor.
 	UPROPERTY()						TArray<URequenceDevice*>	Devices;
 public:
-	UPROPERTY(BlueprintReadOnly)	TArray<FString> FullAxisList;
-	UPROPERTY(BlueprintReadOnly)	TArray<FString> FullActionList;
+	//Full Axis list - Used to make sure all devices have every axis
+	UPROPERTY()						TArray<FString> FullAxisList;
+
+	//Full Action list - Used to make sure all devices have every action
+	UPROPERTY()						TArray<FString> FullActionList;
+
+	//Whether edit mode is enabled - This can be used in blueprint to track if one entry is being edited.
+	UPROPERTY()						bool bEditModeEnabled = false;
+
+	//If edit mode is enabled, this will contain the device type.
+	UPROPERTY()						ERequenceDeviceType EditModeDeviceType = ERequenceDeviceType::RDT_Unknown;
 
 
 	//////////////////////////////////////////////////////////////////////////
-	//Core functions
+	// Delegates
 	//////////////////////////////////////////////////////////////////////////
+public:
+	//Called when Edit Mode has started
+	UPROPERTY(BlueprintAssignable)	FRequenceOnEditModeStarted OnEditModeStarted;
+	
+	//Called when Edit Mode has ended
+	UPROPERTY(BlueprintAssignable)	FRequenceOnEditModeEnded OnEditModeEnded;
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// Core functions
+	//////////////////////////////////////////////////////////////////////////
+private:
 	//Converts Unreals' Input.ini to our format. Returns false if failed.
 	UFUNCTION()						bool LoadUnrealInput();	
 
 	//Places our format safely back as Input.ini. Returns false if failed. Note that this function should be avoided and use the Requence save file.
 	UFUNCTION()						bool SaveUnrealInput(bool Force);		
-
+public:
 	//Load in Requence save file. If it does not exist (since nothing is customized) we load in UE4's Defaults. Returns success. If ForceDefault is true all devices will be reset to their default bindings.
 	UFUNCTION(BlueprintCallable)	bool LoadInput(bool ForceDefault);
 
@@ -64,6 +89,7 @@ public:
 
 	//Function to run on game startup. Loads in Save game and applies custom inputs to runtime.
 	UFUNCTION(BlueprintCallable)	void OnGameStartup();
+
 
 	//////////////////////////////////////////////////////////////////////////
 	//Importing / Exporting 
@@ -106,4 +132,13 @@ public:
 
 	//Returns the default import/export path for input presets.
 	UFUNCTION(BlueprintCallable)	FString GetDefaultPresetFilePath() { return FPaths::GameSavedDir() + "InputPresets/"; }
+
+	//Returns whether edit mode is enabled, if enabled it will also return the device type. if not device type is null.
+	UFUNCTION(BlueprintCallable)	bool GetEditModeEnabled(ERequenceDeviceType& DeviceType);
+
+	//Starts edit mode.
+	UFUNCTION(BlueprintCallable)	void SetEditModeStarted(ERequenceDeviceType DeviceType);
+
+	//Ends edit mode.
+	UFUNCTION(BlueprintCallable)	void SetEditModeEnded();
 };

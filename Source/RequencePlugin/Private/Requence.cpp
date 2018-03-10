@@ -157,7 +157,7 @@ bool URequence::LoadInput(bool ForceDefault)
 			for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
 			{
 				URequenceDevice* newDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
-				newDevice->FromStruct(SavedDevice);
+				newDevice->FromStruct(SavedDevice, this);
 				Devices.Add(newDevice);
 			}
 			if (Devices.Num() > 0) { return true; }
@@ -295,6 +295,7 @@ bool URequence::ImportDeviceAsPreset(FString AbsolutePath)
 				NewDevice->DeviceString = JsonDevice->GetStringField(TEXT("DeviceString"));
 				NewDevice->SetJsonAsActions(JsonDevice->GetArrayField(TEXT("Actions")));
 				NewDevice->SetJsonAsAxises(JsonDevice->GetArrayField(TEXT("Axises")));
+				NewDevice->RequenceRef = this;
 				AddAllEmpty(NewDevice);
 				NewDevice->SortAlphabetically();
 
@@ -363,6 +364,7 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 		device->DeviceType = NewDeviceType;
 		device->DeviceString = URequenceDevice::GetDeviceNameByType(NewDeviceType);
 		device->DeviceName = device->DeviceString;
+		device->RequenceRef = this;
 		Devices.Add(device);
 		return device;
 	}
@@ -469,4 +471,28 @@ bool URequence::HasUpdated()
 		}
 	}
 	return false;
+}
+
+bool URequence::GetEditModeEnabled(ERequenceDeviceType& DeviceType)
+{
+	if (!bEditModeEnabled) 
+	{
+		EditModeDeviceType = ERequenceDeviceType::RDT_Unknown;
+	}
+	DeviceType = EditModeDeviceType;
+	return bEditModeEnabled;
+}
+
+void URequence::SetEditModeStarted(ERequenceDeviceType DeviceType)
+{
+	bEditModeEnabled = true;
+	EditModeDeviceType = DeviceType;
+	OnEditModeStarted.Broadcast(DeviceType);
+}
+
+void URequence::SetEditModeEnded()
+{
+	bEditModeEnabled = false;
+	EditModeDeviceType = ERequenceDeviceType::RDT_Unknown;
+	OnEditModeEnded.Broadcast();
 }
