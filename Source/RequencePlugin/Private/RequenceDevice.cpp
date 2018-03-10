@@ -335,6 +335,8 @@ TArray<TSharedPtr<FJsonValue>> URequenceDevice::GetActionsAsJson()
 	TArray<TSharedPtr<FJsonValue>> JsonActions;
 	for (FRequenceInputAction ac : Actions)
 	{
+		if (ac.Key == FKey()) { continue; }	//Skip if empty.
+
 		TSharedPtr<FJsonObject> Action = MakeShareable(new FJsonObject);
 		Action->SetStringField("ActionName", ac.ActionName);
 		Action->SetStringField("Key", ac.Key.ToString());
@@ -354,6 +356,8 @@ TArray<TSharedPtr<FJsonValue>> URequenceDevice::GetAxisesAsJson()
 	TArray<TSharedPtr<FJsonValue>> JsonAxises;
 	for (FRequenceInputAxis ax : Axises)
 	{
+		if (ax.Key == FKey()) { continue; }	//Skip if empty.
+
 		TSharedPtr<FJsonObject> Axis = MakeShareable(new FJsonObject);
 		Axis->SetStringField("AxisName", ax.AxisName);
 		Axis->SetStringField("Key", ax.Key.ToString());
