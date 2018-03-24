@@ -19,6 +19,11 @@ ERequenceDeviceType URequenceDevice::GetDeviceTypeByKeyString(FString KeyString)
 	return ERequenceDeviceType::RDT_Unknown;
 }
 
+ERequenceDeviceType URequenceDevice::GetDeviceTypeByKey(FKey Key)
+{
+	return GetDeviceTypeByKeyString(Key.GetDisplayName().ToString());
+}
+
 FString URequenceDevice::GetDeviceNameByType(ERequenceDeviceType DeviceType)
 {
 	switch (DeviceType)
@@ -51,15 +56,41 @@ void URequenceDevice::CompactifyAllKeyNames()
 {
 	for (FRequenceInputAction& ac : Actions)
 	{
-		ac.KeyString = CompactifyKeyName(ac.KeyString);
+		ac.KeyString = CompactifyKeyString(ac.KeyString);
 	}
 	for (FRequenceInputAxis& ax : Axises)
 	{
-		ax.KeyString = CompactifyKeyName(ax.KeyString);
+		ax.KeyString = CompactifyKeyString(ax.KeyString);
 	}
 }
 
-FString URequenceDevice::CompactifyKeyName(FString InName)
+FRequenceInputAction URequenceDevice::UpdateKeyStringAction(FRequenceInputAction Action, bool bDoCompactify)
+{
+	FRequenceInputAction toReturn = Action;
+	if (Action.Key != FKey()) { toReturn.KeyString = GenerateKeyString(toReturn.Key, bDoCompactify, toReturn.bShift, toReturn.bCtrl, toReturn.bCmd, toReturn.bAlt); }
+	return toReturn;
+}
+
+FRequenceInputAxis URequenceDevice::UpdateKeyStringAxis(FRequenceInputAxis Axis, bool bDoCompactify)
+{
+	FRequenceInputAxis toReturn = Axis;
+	if (Axis.Key != FKey()) { toReturn.KeyString = GenerateKeyString(toReturn.Key, bDoCompactify, false, false, false, false); }
+	return toReturn;
+}
+
+FString URequenceDevice::GenerateKeyString(FKey key, bool bDoCompactify, bool bShift, bool bCtrl, bool bCmd, bool bAlt)
+{
+	FString toReturn;
+	if (bShift) { toReturn.Append("Shift + "); }
+	if (bCtrl) { toReturn.Append("Control + "); }
+	if (bCmd) { toReturn.Append("Command + "); }
+	if (bAlt) { toReturn.Append("Alt + "); }
+	toReturn.Append(key.GetDisplayName().ToString());
+	if (bDoCompactify) { toReturn = CompactifyKeyString(toReturn); }
+	return toReturn;
+}
+
+FString URequenceDevice::CompactifyKeyString(FString InName)
 {
 	FString outName = InName;
 	outName = outName.Replace(TEXT("Gamepad "), TEXT(""));
@@ -102,6 +133,39 @@ bool URequenceDevice::HasAxisBinding(FString AxisName, bool MustBeBound)
 		}
 	}
 	return false;
+}
+
+int URequenceDevice::HasNumOfActionBinding(FString ActionName, bool bMustBeBound)
+{
+	int toReturn = 0;
+	for (FRequenceInputAction ac : Actions)
+	{
+		if (ac.ActionName == ActionName)
+		{
+			if (bMustBeBound)
+			{
+				if (ac.Key != FKey()) { toReturn++; }
+			}
+			else { toReturn++; }
+		}
+	}
+	return toReturn;
+}
+
+int URequenceDevice::HasNumOfAxisBinding(FString AxisName, bool bMustBeBound)
+{
+	int toReturn = 0;
+	for (FRequenceInputAxis ax : Axises)
+	{
+		if (ax.AxisName == AxisName)
+		{
+			if (bMustBeBound) {
+				if (ax.Key != FKey()) { toReturn++; }
+			}
+			else { toReturn++; }
+		}
+	}
+	return toReturn;
 }
 
 void URequenceDevice::SortAlphabetically()
@@ -156,12 +220,11 @@ bool URequenceDevice::StartEditMode()
 	return false;
 }
 
-void URequenceDevice::AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList)
+void URequenceDevice::AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList, int numRequired)
 {
 	for (FString ac : FullActionList)
 	{
-		if (!HasActionBinding(ac, false))
-		{
+		for (int i = HasNumOfActionBinding(ac, false); i < numRequired; i++) {
 			FRequenceInputAction newAction;
 			newAction.ActionName = ac;
 			Actions.Add(newAction);
@@ -169,8 +232,7 @@ void URequenceDevice::AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> 
 	}
 	for (FString ax : FullAxisList)
 	{
-		if (!HasAxisBinding(ax, false))
-		{
+		for (int i = HasNumOfAxisBinding(ax, false); i < numRequired; i++) {
 			FRequenceInputAxis newAxis;
 			newAxis.AxisName = ax;
 			Axises.Add(newAxis);
@@ -263,7 +325,7 @@ bool URequenceDevice::RebindAction(FRequenceInputAction OldAction, FRequenceInpu
 		{
 			Actions.RemoveAt(toChange, 1, false);
 			FRequenceInputAction a = UpdatedAction;
-			a.KeyString = CompactifyKeyName(a.Key.ToString());
+			a.KeyString = CompactifyKeyString(a.Key.ToString());
 			Actions.Insert(a, toChange);
 			Updated = true;
 			return true;
@@ -298,7 +360,7 @@ bool URequenceDevice::RebindAxis(FRequenceInputAxis OldAxis, FRequenceInputAxis 
 		{
 			Axises.RemoveAt(toChange, 1, false);
 			FRequenceInputAxis a = UpdatedAxis;
-			a.KeyString = CompactifyKeyName(a.Key.ToString());
+			a.KeyString = CompactifyKeyString(a.Key.ToString());
 			Axises.Insert(a, toChange);
 			Updated = true;
 			return true;
@@ -467,7 +529,7 @@ void URequenceDevice::SetJsonAsActions(TArray<TSharedPtr<FJsonValue>> _Actions)
 			FRequenceInputAction NewAction;
 			NewAction.ActionName = JsonAction->GetStringField(TEXT("ActionName"));
 			NewAction.Key = FKey(FName(*JsonAction->GetStringField(TEXT("Key"))));
-			NewAction.KeyString = CompactifyKeyName(NewAction.Key.ToString());
+			NewAction.KeyString = CompactifyKeyString(NewAction.Key.ToString());
 			NewAction.bShift = JsonAction->GetBoolField(TEXT("bShift"));
 			NewAction.bCtrl = JsonAction->GetBoolField(TEXT("bCtrl"));
 			NewAction.bAlt = JsonAction->GetBoolField(TEXT("bAlt"));
@@ -488,7 +550,7 @@ void URequenceDevice::SetJsonAsAxises(TArray<TSharedPtr<FJsonValue>> _Axises)
 			FRequenceInputAxis NewAxis;
 			NewAxis.AxisName = JsonAxis->GetStringField(TEXT("AxisName"));
 			NewAxis.Key = FKey(FName(*JsonAxis->GetStringField(TEXT("Key"))));
-			NewAxis.KeyString = CompactifyKeyName(NewAxis.Key.ToString());
+			NewAxis.KeyString = CompactifyKeyString(NewAxis.Key.ToString());
 			NewAxis.Scale = JsonAxis->GetNumberField(TEXT("Scale"));
 			Axises.Add(NewAxis);
 		}

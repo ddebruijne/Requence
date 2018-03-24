@@ -37,6 +37,7 @@ public:
 
 	//Returns the device type by a bound key
 	static ERequenceDeviceType GetDeviceTypeByKeyString(FString KeyString);
+	UFUNCTION(BlueprintCallable) ERequenceDeviceType GetDeviceTypeByKey(FKey Key);
 
 	//Returns the device name by the set device key. Will return Unknown for unique devices.
 	static FString GetDeviceNameByType(ERequenceDeviceType DeviceType);
@@ -44,8 +45,17 @@ public:
 	//Loops through all axises and actions and applies the CompactifyName function on the Action/Axis name.
 	UFUNCTION() void CompactifyAllKeyNames();
 
+	//Returns a new struct with updated KeyString
+	UFUNCTION(BlueprintCallable) FRequenceInputAction UpdateKeyStringAction(FRequenceInputAction Action, bool bDoCompactify);
+
+	//Returns a new struct with updated KeyString
+	UFUNCTION(BlueprintCallable) FRequenceInputAxis UpdateKeyStringAxis(FRequenceInputAxis Axis, bool bDoCompactify);
+
+	//Generates a new keystring axis
+	UFUNCTION(BlueprintCallable) FString GenerateKeyString(FKey key, bool bDoCompactify, bool bShift, bool bCtrl, bool bCmd, bool bAlt);
+
 	//Filters the name of an key so it's more compact.
-	UFUNCTION() FString CompactifyKeyName(FString InName);
+	UFUNCTION(BlueprintCallable) FString CompactifyKeyString(FString InName);
 
 	//Bubble sorts the actions and axises based on name.
 	UFUNCTION(BlueprintCallable) void SortAlphabetically();
@@ -54,7 +64,7 @@ public:
 	UFUNCTION(BlueprintCallable) bool StartEditMode();
 
 	//Adds all not-found axises and actions from the full action list.
-	UFUNCTION()	void AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList);
+	UFUNCTION()	void AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList, int numRequired = 1);
 
 	//Removes all actions and axises that are no longer found in the full action/axis list. returns whether axises are removed.
 	UFUNCTION() bool FilterDeleted(TArray<FString> FullAxisList, TArray<FString> FullActionList);
@@ -69,11 +79,17 @@ public:
 	//Check whether the provided axis is already in the list.
 	UFUNCTION(BlueprintCallable) bool HasAxisBinding(FString AxisName, bool MustBeBound);
 
+	//Check how many of one action binding are already in the list.
+	UFUNCTION(BlueprintCallable) int HasNumOfActionBinding(FString ActionName, bool bMustBeBound);
+
+	//Check how many of one axis binding are already in the list.
+	UFUNCTION(BlueprintCallable) int HasNumOfAxisBinding(FString AxisName, bool bMustBeBound);
+
 	//Adds a new action to this device. Checks for doubles. returns success.
-	UFUNCTION() bool AddAction(FRequenceInputAction _action);
+	UFUNCTION(BlueprintCallable) bool AddAction(FRequenceInputAction _action);
 
 	//Adds a new axis to this device. Checks for doubles. returns success.
-	UFUNCTION() bool AddAxis(FRequenceInputAxis _axis);
+	UFUNCTION(BlueprintCallable) bool AddAxis(FRequenceInputAxis _axis);
 
 	//Rebinds action. ActionName must be the same. returns success.
 	UFUNCTION(BlueprintCallable) bool RebindAction(FRequenceInputAction OldAction, FRequenceInputAction UpdatedAction);
@@ -81,10 +97,10 @@ public:
 	//Rebinds Axis. AxisName must be the same. returns success.
 	UFUNCTION(BlueprintCallable) bool RebindAxis(FRequenceInputAxis OldAxis, FRequenceInputAxis UpdatedAxis);
 
-	//Deletes action by string. returns success.
+	//Deletes action by string. returns success. bLeaveActionName leaves your struct in the array if you don't want to create news but rebind
 	UFUNCTION(BlueprintCallable) bool DeleteAction(FString ActionName);
 
-	//Deletes axis by string. returns success.
+	//Deletes axis by string. returns success. bLeaveAxisName leaves your struct in the array if you don't want to create news but rebind
 	UFUNCTION(BlueprintCallable) bool DeleteAxis(FString AxisName);
 
 
