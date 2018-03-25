@@ -93,12 +93,16 @@ FString URequenceDevice::GenerateKeyString(FKey key, bool bDoCompactify, bool bS
 FString URequenceDevice::CompactifyKeyString(FString InName)
 {
 	FString outName = InName;
+	if (outName == "Mouse X" || outName == "Mouse Y") { outName.Append(" Axis"); }
 	outName = outName.Replace(TEXT("Gamepad "), TEXT(""));
 	outName = outName.Replace(TEXT("MotionController "), TEXT(""));
 	outName = outName.Replace(TEXT("Mouse "), TEXT(""));
 	outName = outName.Replace(TEXT("Joystick"), TEXT(""));
 	outName = outName.Replace(TEXT("stick"), TEXT("stk"));
 	outName = outName.Replace(TEXT("button"), TEXT("btn"));
+	outName = outName.Replace(TEXT("Shift"), TEXT("shft"));
+	outName = outName.Replace(TEXT("Control"), TEXT("ctrl"));
+	outName = outName.Replace(TEXT("Command"), TEXT("cmd"));
 	outName = outName.Replace(TEXT("_"), TEXT(" "));
 	outName.Trim();
 	return outName;
