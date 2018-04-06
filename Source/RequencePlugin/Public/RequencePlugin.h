@@ -4,12 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
+#include "RequenceSDL.h"
 
 class FRequencePluginModule : public IModuleInterface
 {
-public:
+private:
+	void* SDLLibrary;
 
-	/** IModuleInterface implementation */
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+	URequenceSDL* SDLManager;
 };
