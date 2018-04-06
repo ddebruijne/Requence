@@ -3,17 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ModuleManager.h"
-#include "RequenceSDL.h"
+#include "IRequencePlugin.h"
+#include "RequenceInputDevice.h"
 
-class FRequencePluginModule : public IModuleInterface
+class FRequencePluginModule : public IRequencePlugin
 {
 private:
 	void* SDLLibrary;
 
 public:
+	virtual TSharedPtr<class IInputDevice> CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override;
+
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	URequenceSDL* SDLManager;
 };
