@@ -13,6 +13,13 @@ RequenceInputDevice::~RequenceInputDevice()
 
 	SDL_DelEventWatch(HandleSDLEvent, this);
 
+	for (FSDLDeviceInfo Device : Devices) {
+		if (Device.Joystick != nullptr) {
+			SDL_JoystickClose(Device.Joystick);
+		}
+	}
+	Devices.Empty();
+
 	if (bOwnsSDL)
 	{
 		SDL_Quit();
@@ -50,16 +57,70 @@ int RequenceInputDevice::HandleSDLEvent(void* UserData, SDL_Event* Event)
 	switch (Event->type) 
 	{
 		case SDL_JOYDEVICEADDED:
-			UE_LOG(LogTemp, Log, TEXT("SDL DEVICE ADD EVENT"));
+			Self.AddDevice(Event->jdevice.which);
 			break;
 		case SDL_JOYDEVICEREMOVED:
-			UE_LOG(LogTemp, Log, TEXT("SDL DEVICE REM EVENT"));
+			Self.RemDevice(Event->jdevice.which);
+			break;
+		case SDL_JOYBUTTONDOWN:
+			break;
+		case SDL_JOYBUTTONUP:
 			break;
 		default:
 			break;
 	}
 
 	return 0;
+}
+
+bool RequenceInputDevice::AddDevice(int Which)
+{
+	//It's already in!
+	for (FSDLDeviceInfo d : Devices) {
+		if (d.Which == Which) { return false; }
+	}
+
+	FSDLDeviceInfo Device;
+	Device.Which = Which;
+	Device.Joystick = SDL_JoystickOpen(Which);
+	if (Device.Joystick == nullptr) {
+		return false;
+	}
+	Device.InstanceID = SDL_JoystickInstanceID(Device.Joystick);
+
+	Device.Name = FString(ANSI_TO_TCHAR(SDL_JoystickName(Device.Joystick)));
+	UE_LOG(LogTemp, Log, TEXT("Requence input device connected: %s (which: %i, instance: %i)"), *Device.Name, Which, Device.InstanceID);
+	UE_LOG(LogTemp, Log, TEXT("- Axises %i"), SDL_JoystickNumAxes(Device.Joystick));
+	UE_LOG(LogTemp, Log, TEXT("- Balls %i"), SDL_JoystickNumBalls(Device.Joystick));
+	UE_LOG(LogTemp, Log, TEXT("- Buttons %i"), SDL_JoystickNumButtons(Device.Joystick));
+	UE_LOG(LogTemp, Log, TEXT("- Hats %i"), SDL_JoystickNumHats(Device.Joystick));
+
+	Devices.Add(Device);
+	return true;
+}
+
+bool RequenceInputDevice::RemDevice(int InstanceID)
+{
+	bool found = false;
+	for (int i = Devices.Num()-1; i >= 0; i--) {
+		if (Devices[i].InstanceID == InstanceID) {
+			found = true;
+			UE_LOG(LogTemp, Log, TEXT("Requence input device disconnected: %s"), *Devices[i].Name);
+
+			if (Devices[i].Joystick != nullptr)
+			{
+				SDL_JoystickClose(Devices[i].Joystick);
+				Devices[i].Joystick = nullptr;
+			}
+			else { UE_LOG(LogTemp, Warning, TEXT("Tried to remove %s but the SDL device was a nullpointer! Cleaning up..."), *Devices[i].Name); }
+
+			Devices.RemoveAt(i);
+			break;
+		}
+	}
+
+	//return success.
+	return !found;
 }
 
 void RequenceInputDevice::Tick(float DeltaTime)

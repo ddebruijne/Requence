@@ -8,6 +8,17 @@
 #include "SDL.h"
 #include "SDL_joystick.h"
 
+struct FSDLDeviceInfo
+{
+	int Which;
+	int InstanceID;
+	FString Name;
+
+	SDL_Joystick* Joystick = nullptr;
+
+	FSDLDeviceInfo() {}
+};
+
 /**
  * 
  */
@@ -15,6 +26,7 @@ class REQUENCEPLUGIN_API RequenceInputDevice : public IInputDevice
 {
 public:
 	bool bOwnsSDL = false;
+	TArray<FSDLDeviceInfo> Devices;
 
 	RequenceInputDevice() {}
 	RequenceInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -22,6 +34,8 @@ public:
 
 	void InitSDL();
 	static int HandleSDLEvent(void* UserData, SDL_Event* e);
+	bool AddDevice(int Which);
+	bool RemDevice(int InstanceID);
 
 	//InputDevice Interface
 	virtual void Tick(float DeltaTime) override;
