@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine.h"
 #include "IInputDevice.h"
+#include "InputCoreTypes.h"
 
 #include "SDL.h"
 #include "SDL_joystick.h"
@@ -16,6 +18,13 @@ struct FSDLDeviceInfo
 
 	SDL_Joystick* Joystick = nullptr;
 
+	TArray<FKey> Axises;
+	TArray<FKey> Buttons;
+
+//	TMap<int, FVector2D>	InputState_Hat;
+// 	TArray<bool>	InputState_Buttons;
+// 	TArray<float>	InputState_Axes;
+
 	FSDLDeviceInfo() {}
 };
 
@@ -25,6 +34,7 @@ struct FSDLDeviceInfo
 class REQUENCEPLUGIN_API RequenceInputDevice : public IInputDevice
 {
 public:
+
 	bool bOwnsSDL = false;
 	TArray<FSDLDeviceInfo> Devices;
 
@@ -36,6 +46,9 @@ public:
 	static int HandleSDLEvent(void* UserData, SDL_Event* e);
 	bool AddDevice(int Which);
 	bool RemDevice(int InstanceID);
+	int GetDeviceIndexByWhich(int Which);
+
+	void HandleInput_Hat(SDL_Event* e);
 
 	//InputDevice Interface
 	virtual void Tick(float DeltaTime) override;
@@ -47,4 +60,5 @@ public:
 
 private:
 	TSharedRef<FGenericApplicationMessageHandler> MessageHandler;
+
 };
