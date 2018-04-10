@@ -2,6 +2,8 @@
 
 #include "RequenceInputDevice.h"
 #include "Text.h"
+#include "Events.h"
+#include "SlateApplication.h"
 
 #define LOCTEXT_NAMESPACE "RequencePlugin"
 
@@ -99,7 +101,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 	}
 	Device.InstanceID = SDL_JoystickInstanceID(Device.Joystick);
 
-	Device.Name = FString(ANSI_TO_TCHAR(SDL_JoystickName(Device.Joystick)));
+	Device.Name = FString(ANSI_TO_TCHAR(SDL_JoystickName(Device.Joystick))).Replace(TEXT("."), TEXT(""), ESearchCase::IgnoreCase);
 	UE_LOG(LogTemp, Log, TEXT("Requence input device connected: %s (which: %i, instance: %i)"), *Device.Name, Which, Device.InstanceID);
 	UE_LOG(LogTemp, Log, TEXT("- Axises %i"), SDL_JoystickNumAxes(Device.Joystick));
 	UE_LOG(LogTemp, Log, TEXT("- Buttons %i"), SDL_JoystickNumButtons(Device.Joystick));
@@ -108,7 +110,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 	//Add Buttons
 	for (int i = 0; i < SDL_JoystickNumButtons(Device.Joystick); i++)
 	{
-		FString keyName = FString::Printf(TEXT("Joystick %s Button %i"), *Device.Name, i);
+		FString keyName = FString::Printf(TEXT("Joystick_%s_Button_%i"), *Device.Name, i);
 		FKey key{ *keyName };
 		Device.Buttons.Add(key);
 
@@ -123,7 +125,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 	//Add Axises
 	for (int i = 0; i < SDL_JoystickNumAxes(Device.Joystick); i++)
 	{
-		FString keyName = FString::Printf(TEXT("Joystick %s Axis %i"), *Device.Name, i);
+		FString keyName = FString::Printf(TEXT("Joystick_%s_Axis_%i"), *Device.Name, i);
 		FKey key{ *keyName };
 		Device.Axises.Add(key);
 
@@ -136,36 +138,38 @@ bool RequenceInputDevice::AddDevice(int Which)
 	}
 
 	//Add HATS
-	TArray<FString> HatDirections = { "Down", "LeftDown", "Left", "LeftUp", "Up", "RightUp", "Right", "RightDown" };
-	TArray<FString> HatAxises = { "X", "Y" };
 	for (int i = 0; i < SDL_JoystickNumHats(Device.Joystick); i++) 
 	{
+		Device.HatKeys.Add(i, FHatData());
+		Device.OldHatState.Add(i, 0);
+
 		//Buttons for all 8 keys
-		for (int j = 0; j < HatDirections.Num(); j++) 
+		for (int j = 0; j < _HatDirections.Num(); j++) 
 		{
-			FString keyName = FString::Printf(TEXT("Joystick %s Hat %i %s"), *Device.Name, i, *HatDirections[j]);
+			FString keyName = FString::Printf(TEXT("Joystick_%s_Hat_%i_%s"), *Device.Name, i, *_HatDirections[j]);
 			FKey key{ *keyName };
-			Device.Buttons.Add(key);
+			Device.HatKeys[i].Buttons.Add(_HatDirectionMap[j], key);
 
 			//Add a new key if this one isn't there yet.
 			if (!EKeys::GetKeyDetails(key).IsValid()) 
 			{
-				FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Hat {1} {2}"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(HatDirections[j]));
+				FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Hat {1} {2}"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(_HatDirections[j]));
 				EKeys::AddKey(FKeyDetails(key, textValue, FKeyDetails::GamepadKey));
 			}
 		}
+		Device.HatKeys[i].Buttons.Add(SDL_HAT_CENTERED, FKey());
 
 		//Two axises.
-		for (int k = 0; k < HatAxises.Num(); k++)
+		for (int k = 0; k < _HatAxises.Num(); k++)
 		{
-			FString keyName = FString::Printf(TEXT("Joystick %s Hat %i %s-Axis"), *Device.Name, i, *HatAxises[k]);
+			FString keyName = FString::Printf(TEXT("Joystick_%s_Hat_%i_%s-Axis"), *Device.Name, i, *_HatAxises[k]);
 			FKey key{ *keyName };
-			Device.Axises.Add(key);
+			Device.HatKeys[i].Axises.Add(_HatAxises[k], key);
 
 			//Add a new key if this one isn't there yet.
 			if (!EKeys::GetKeyDetails(key).IsValid())
 			{
-				FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Hat {1} {2}-Axis"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(HatAxises[k]));
+				FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Hat {1} {2}-Axis"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(_HatAxises[k]));
 				EKeys::AddKey(FKeyDetails(key, textValue, FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 			}
 		}
@@ -211,10 +215,50 @@ int RequenceInputDevice::GetDeviceIndexByWhich(int Which)
 
 void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 {
-	FVector2D HatInput = FVector2D::ZeroVector;
-	int value = e->jhat.value;
+	if (!bOwnsSDL) { return; }
 
-	switch (e->jhat.value)
+	FVector2D HatInput = HatStateToVector(e->jhat.value);
+	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	int HatID = e->jhat.hat;
+
+	//Button
+	FKey ButtonKey = Devices[DevID].HatKeys[HatID].Buttons[e->jhat.value];
+
+	if (Devices[DevID].OldHatState.Num() > 0 && _HatDirectionMap.Contains(Devices[DevID].OldHatState[HatID]))
+	{
+		//Up event for old hat
+		FKey OldKey = Devices[DevID].HatKeys[HatID].Buttons[
+			Devices[DevID].OldHatState[HatID]
+		];
+		FKeyEvent UpEvent(OldKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0);
+		FSlateApplication::Get().ProcessKeyUpEvent(UpEvent);
+	}
+
+	//down event for new hat, unless SDL_HAT_CENTERED
+	if (e->jhat.value != SDL_HAT_CENTERED)
+	{
+		FKeyEvent DownEvent(ButtonKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0);
+		FSlateApplication::Get().ProcessKeyDownEvent(DownEvent);
+	}
+
+	//Axis
+	FKey XKey = Devices[DevID].HatKeys[HatID].Axises["X"];
+	FKey YKey = Devices[DevID].HatKeys[HatID].Axises["Y"];
+
+	FAnalogInputEvent XEvent(XKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, HatInput.X);
+	FAnalogInputEvent YEvent(YKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, HatInput.Y);
+
+	FSlateApplication::Get().ProcessAnalogInputEvent(XEvent);
+	FSlateApplication::Get().ProcessAnalogInputEvent(YEvent);
+
+	Devices[DevID].OldHatState[e->jhat.hat] = e->jhat.value;
+}
+
+FVector2D RequenceInputDevice::HatStateToVector(uint8 SDL_HAT_STATE)
+{
+	FVector2D HatInput;
+
+	switch (SDL_HAT_STATE)
 	{
 		case SDL_HAT_CENTERED:
 			HatInput = FVector2D::ZeroVector;
@@ -253,12 +297,7 @@ void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 			break;
 	}
 
-// 	int index = GetDeviceIndexByWhich(e->jdevice.which);
-// 	if (index >= 0) {
-// 		Devices[GetDeviceIndexByWhich(e->jdevice.which)].InputState_Hat[e->jhat.hat] = HatInput;
-// 	}
-
-	UE_LOG(LogTemp, Log, TEXT("HAT %i input: %s"), e->jhat.hat, *HatInput.ToString());
+	return HatInput;
 }
 
 void RequenceInputDevice::Tick(float DeltaTime)
@@ -273,23 +312,6 @@ void RequenceInputDevice::SendControllerEvents()
 		SDL_Event Event;
 		while (SDL_PollEvent(&Event)) {}
 	}
-}
-
-void RequenceInputDevice::SetMessageHandler(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler)
-{
-}
-
-bool RequenceInputDevice::Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar)
-{
-	return false;
-}
-
-void RequenceInputDevice::SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value)
-{
-}
-
-void RequenceInputDevice::SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values)
-{
 }
 
 #undef LOCTEXT_NAMESPACE

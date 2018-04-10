@@ -10,6 +10,15 @@
 #include "SDL.h"
 #include "SDL_joystick.h"
 
+struct FHatData
+{
+	int HatID;
+	TMap<uint8, FKey> Buttons;
+	TMap<FString, FKey> Axises;
+
+	FHatData() {}
+};
+
 struct FSDLDeviceInfo
 {
 	int Which;
@@ -21,9 +30,8 @@ struct FSDLDeviceInfo
 	TArray<FKey> Axises;
 	TArray<FKey> Buttons;
 
-//	TMap<int, FVector2D>	InputState_Hat;
-// 	TArray<bool>	InputState_Buttons;
-// 	TArray<float>	InputState_Axes;
+	TMap<int, uint8> OldHatState;
+	TMap<int, FHatData> HatKeys;
 
 	FSDLDeviceInfo() {}
 };
@@ -34,6 +42,11 @@ struct FSDLDeviceInfo
 class REQUENCEPLUGIN_API RequenceInputDevice : public IInputDevice
 {
 public:
+	TArray<FString> _HatDirections = {	"Down",	"LeftDown", "Left", "LeftUp", 
+										"Up", "RightUp", "Right", "RightDown" };
+	TArray<uint8>	_HatDirectionMap = { SDL_HAT_DOWN, SDL_HAT_LEFTDOWN, SDL_HAT_LEFT, SDL_HAT_LEFTUP, 
+										 SDL_HAT_UP, SDL_HAT_RIGHTUP, SDL_HAT_RIGHT, SDL_HAT_RIGHTDOWN };
+	TArray<FString> _HatAxises = { "X", "Y" };
 
 	bool bOwnsSDL = false;
 	TArray<FSDLDeviceInfo> Devices;
@@ -50,13 +63,15 @@ public:
 
 	void HandleInput_Hat(SDL_Event* e);
 
+	FVector2D HatStateToVector(uint8 SDL_HAT_STATE);
+
 	//InputDevice Interface
 	virtual void Tick(float DeltaTime) override;
 	virtual void SendControllerEvents() override;
-	virtual void SetMessageHandler(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override;
-	virtual bool Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override;
-	virtual void SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) override;
-	virtual void SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) override;
+	virtual void SetMessageHandler(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override {}
+	virtual bool Exec(UWorld* InWorld, const TCHAR* Cmd, FOutputDevice& Ar) override { return false; }
+	virtual void SetChannelValue(int32 ControllerId, FForceFeedbackChannelType ChannelType, float Value) override {}
+	virtual void SetChannelValues(int32 ControllerId, const FForceFeedbackValues &values) override {}
 
 private:
 	TSharedRef<FGenericApplicationMessageHandler> MessageHandler;
