@@ -27,11 +27,14 @@ struct FSDLDeviceInfo
 
 	SDL_Joystick* Joystick = nullptr;
 
-	TArray<FKey> Axises;
-	TArray<FKey> Buttons;
+	TMap<int, float> OldAxisState;	//Map<AxisID, float pos>
+	TMap<int, FKey> Axises;			//Map<ButtonID, FKey>
 
-	TMap<int, uint8> OldHatState;
-	TMap<int, FHatData> HatKeys;
+	TMap<int, bool> OldButtonState;	//Map<ButtonID, Bool Down>
+	TMap<int, FKey> Buttons;		//Map<ButtonID, FKey>
+
+	TMap<int, uint8> OldHatState;	//Map<HatID, SDL_HAT_STATE>
+	TMap<int, FHatData> HatKeys;	//Map<HatID, FHatData>
 
 	FSDLDeviceInfo() {}
 };
@@ -62,6 +65,8 @@ public:
 	int GetDeviceIndexByWhich(int Which);
 
 	void HandleInput_Hat(SDL_Event* e);
+	void HandleInput_Button(SDL_Event* e);
+	void HandleInput_Axis(SDL_Event* e);
 
 	FVector2D HatStateToVector(uint8 SDL_HAT_STATE);
 

@@ -73,11 +73,14 @@ int RequenceInputDevice::HandleSDLEvent(void* UserData, SDL_Event* Event)
 			Self.RemDevice(Event->jdevice.which);
 			break;
 		case SDL_JOYBUTTONDOWN:
-			break;
 		case SDL_JOYBUTTONUP:
+			Self.HandleInput_Button(Event);
 			break;
 		case SDL_JOYHATMOTION:
 			Self.HandleInput_Hat(Event);
+			break;
+		case SDL_JOYAXISMOTION:
+			Self.HandleInput_Axis(Event);
 			break;
 		default:
 			break;
@@ -112,7 +115,8 @@ bool RequenceInputDevice::AddDevice(int Which)
 	{
 		FString keyName = FString::Printf(TEXT("Joystick_%s_Button_%i"), *Device.Name, i);
 		FKey key{ *keyName };
-		Device.Buttons.Add(key);
+		Device.Buttons.Add(i, key);
+		Device.OldButtonState.Add(i, false);
 
 		//Add a new key if this one isn't there yet.
 		if (!EKeys::GetKeyDetails(key).IsValid())
@@ -127,7 +131,8 @@ bool RequenceInputDevice::AddDevice(int Which)
 	{
 		FString keyName = FString::Printf(TEXT("Joystick_%s_Axis_%i"), *Device.Name, i);
 		FKey key{ *keyName };
-		Device.Axises.Add(key);
+		Device.Axises.Add(i, key);
+		Device.OldAxisState.Add(i, 0.f);
 
 		//Add a new key if this one isn't there yet.
 		if (!EKeys::GetKeyDetails(key).IsValid())
@@ -252,6 +257,51 @@ void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 	FSlateApplication::Get().ProcessAnalogInputEvent(YEvent);
 
 	Devices[DevID].OldHatState[e->jhat.hat] = e->jhat.value;
+}
+
+void RequenceInputDevice::HandleInput_Button(SDL_Event* e)
+{
+	if (!bOwnsSDL) { return; }
+
+	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	int ButtonID = e->jbutton.button;
+	bool NewButtonState = e->jbutton.state;
+
+	if (!Devices[DevID].Buttons.Contains(ButtonID)) { return; }
+
+	if (NewButtonState)
+	{
+		//Down event
+		FKeyEvent DownEvent(Devices[DevID].Buttons[ButtonID], 
+			FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0);
+		FSlateApplication::Get().ProcessKeyDownEvent(DownEvent);
+	}
+	else
+	{
+		//Up Event
+		FKeyEvent UpEvent(Devices[DevID].Buttons[ButtonID], 
+			FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0);
+		FSlateApplication::Get().ProcessKeyUpEvent(UpEvent);
+	}
+
+	Devices[DevID].OldButtonState[ButtonID] = NewButtonState;
+}
+
+void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
+{
+	if (!bOwnsSDL) { return; }
+
+	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	int AxisID = e->jaxis.axis;
+	float NewAxisState = FMath::Clamp(e->jaxis.value / (e->jaxis.value < 0 ? 32768.0f : 32767.0f), -1.f, 1.f);
+
+	if (!Devices[DevID].Axises.Contains(AxisID)) { return; }
+
+	FAnalogInputEvent AxisEvent(Devices[DevID].Axises[AxisID], 
+		FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, NewAxisState);
+	FSlateApplication::Get().ProcessAnalogInputEvent(AxisEvent);
+
+	Devices[DevID].OldAxisState[AxisID] = NewAxisState;
 }
 
 FVector2D RequenceInputDevice::HatStateToVector(uint8 SDL_HAT_STATE)
