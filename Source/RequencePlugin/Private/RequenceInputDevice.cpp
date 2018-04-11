@@ -113,7 +113,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 	//Add Buttons
 	for (int i = 0; i < SDL_JoystickNumButtons(Device.Joystick); i++)
 	{
-		FString keyName = FString::Printf(TEXT("Joystick_%s_Button_%i"), *Device.Name, i);
+		FString keyName = FString::Printf(TEXT("RequenceJoystick_%s_Button_%i"), *Device.Name, i);
 		FKey key{ *keyName };
 		Device.Buttons.Add(i, key);
 		Device.OldButtonState.Add(i, false);
@@ -121,7 +121,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 		//Add a new key if this one isn't there yet.
 		if (!EKeys::GetKeyDetails(key).IsValid())
 		{
-			FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Button {1}"), FText::FromString(Device.Name), FText::AsNumber(i));
+			FText textValue = FText::Format(LOCTEXT("DeviceHat", "RequenceJoystick {0} Button {1}"), FText::FromString(Device.Name), FText::AsNumber(i));
 			EKeys::AddKey(FKeyDetails(key, textValue, FKeyDetails::GamepadKey));
 		}
 	}
@@ -129,7 +129,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 	//Add Axises
 	for (int i = 0; i < SDL_JoystickNumAxes(Device.Joystick); i++)
 	{
-		FString keyName = FString::Printf(TEXT("Joystick_%s_Axis_%i"), *Device.Name, i);
+		FString keyName = FString::Printf(TEXT("RequenceJoystick_%s_Axis_%i"), *Device.Name, i);
 		FKey key{ *keyName };
 		Device.Axises.Add(i, key);
 		Device.OldAxisState.Add(i, 0.f);
@@ -137,7 +137,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 		//Add a new key if this one isn't there yet.
 		if (!EKeys::GetKeyDetails(key).IsValid())
 		{
-			FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Axis {1}"), FText::FromString(Device.Name), FText::AsNumber(i));
+			FText textValue = FText::Format(LOCTEXT("DeviceHat", "RequenceJoystick {0} Axis {1}"), FText::FromString(Device.Name), FText::AsNumber(i));
 			EKeys::AddKey(FKeyDetails(key, textValue, FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 		}
 	}
@@ -151,14 +151,14 @@ bool RequenceInputDevice::AddDevice(int Which)
 		//Buttons for all 8 keys
 		for (int j = 0; j < _HatDirections.Num(); j++) 
 		{
-			FString keyName = FString::Printf(TEXT("Joystick_%s_Hat_%i_%s"), *Device.Name, i, *_HatDirections[j]);
+			FString keyName = FString::Printf(TEXT("RequenceJoystick_%s_Hat_%i_%s"), *Device.Name, i, *_HatDirections[j]);
 			FKey key{ *keyName };
 			Device.HatKeys[i].Buttons.Add(_HatDirectionMap[j], key);
 
 			//Add a new key if this one isn't there yet.
 			if (!EKeys::GetKeyDetails(key).IsValid()) 
 			{
-				FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Hat {1} {2}"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(_HatDirections[j]));
+				FText textValue = FText::Format(LOCTEXT("DeviceHat", "RequenceJoystick {0} Hat {1} {2}"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(_HatDirections[j]));
 				EKeys::AddKey(FKeyDetails(key, textValue, FKeyDetails::GamepadKey));
 			}
 		}
@@ -167,14 +167,14 @@ bool RequenceInputDevice::AddDevice(int Which)
 		//Two axises.
 		for (int k = 0; k < _HatAxises.Num(); k++)
 		{
-			FString keyName = FString::Printf(TEXT("Joystick_%s_Hat_%i_%s-Axis"), *Device.Name, i, *_HatAxises[k]);
+			FString keyName = FString::Printf(TEXT("RequenceJoystick_%s_Hat_%i_%s-Axis"), *Device.Name, i, *_HatAxises[k]);
 			FKey key{ *keyName };
 			Device.HatKeys[i].Axises.Add(_HatAxises[k], key);
 
 			//Add a new key if this one isn't there yet.
 			if (!EKeys::GetKeyDetails(key).IsValid())
 			{
-				FText textValue = FText::Format(LOCTEXT("DeviceHat", "Joystick {0} Hat {1} {2}-Axis"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(_HatAxises[k]));
+				FText textValue = FText::Format(LOCTEXT("DeviceHat", "RequenceJoystick {0} Hat {1} {2}-Axis"), FText::FromString(Device.Name), FText::AsNumber(i), FText::FromString(_HatAxises[k]));
 				EKeys::AddKey(FKeyDetails(key, textValue, FKeyDetails::GamepadKey | FKeyDetails::FloatAxis));
 			}
 		}
