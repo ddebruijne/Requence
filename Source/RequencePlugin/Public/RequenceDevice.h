@@ -14,8 +14,6 @@ class URequence;
 /*
 *  Impeller Studios (2018)
 *  RequenceDevice
-*  Contributors: Danny de Bruijne
-*
 *  ...
 */
 UCLASS(EditInlineNew, Meta = (BlueprintSpawnableComponent))

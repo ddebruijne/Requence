@@ -7,8 +7,25 @@
 #include "JsonSerializer.h"
 #include "PlatformFilemanager.h"
 #include "FileHelper.h"
+#include "RequencePlugin.h"
 
-URequence::URequence() {}
+URequence::URequence() 
+{
+	FRequencePluginModule& RPM = FModuleManager::LoadModuleChecked<FRequencePluginModule>("RequencePlugin");
+	if (RPM.InputDevice.IsValid())
+	{
+		RPM.InputDevice->OnDevicesUpdated.AddUFunction(this, FName("RequenceInputDevicesUpdated"));
+	}
+}
+
+URequence::~URequence() 
+{
+	FRequencePluginModule& RPM = FModuleManager::LoadModuleChecked<FRequencePluginModule>("RequencePlugin");
+	if (RPM.InputDevice.IsValid())
+	{
+		RPM.InputDevice->OnDevicesUpdated.RemoveAll(this);
+	}
+}
 
 bool URequence::LoadUnrealInput()
 {
@@ -127,6 +144,74 @@ bool URequence::SaveUnrealInput(bool Force)
 	}
 
 	return false;
+}
+
+void URequence::RequenceInputDevicesUpdated()
+{
+	for (URequenceDevice* URDevice : Devices) {
+		URDevice->Connected = false;
+	}
+
+	FRequencePluginModule& RPM = FModuleManager::LoadModuleChecked<FRequencePluginModule>("RequencePlugin");
+	if (!RPM.InputDevice.IsValid()) { return; }
+
+	for (FSDLDeviceInfo RIDevice : RPM.InputDevice->Devices)
+	{
+		URequenceDevice* found = nullptr;
+		//Try and match the InputDevice to the Stored Device.
+		for (URequenceDevice* URDevice : Devices) 
+		{
+			//match on name
+ 			if (RIDevice.Name == URDevice->DeviceString) 
+			{
+				found = URDevice;
+ 			}
+			if (found) break;
+
+			//match on action keys
+			for (FRequenceInputAction ac : URDevice->Actions) 
+			{
+				if (ac.KeyString.Contains(RIDevice.Name))
+				{
+					found = URDevice;
+					break;
+				}
+			}
+			if (found) break;
+
+			//match on axis key.
+			for (FRequenceInputAxis ax : URDevice->Axises)
+			{
+				if (ax.KeyString.Contains(RIDevice.Name))
+				{
+					found = URDevice;
+					break;
+				}
+			}
+			if (found) break;
+
+			//When all else failed.
+			URDevice->Connected = false;
+		}
+
+		//No device found. Create one!
+		if (!found) {
+			found = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+			found->DeviceType = ERequenceDeviceType::RDT_Unique;
+			found->DeviceString = RIDevice.Name;
+			found->DeviceName = RIDevice.Name;
+			found->RequenceRef = this;
+			Devices.Add(found);
+			FillFullAxisActionLists();
+		}
+
+		//Update status.
+		found->DeviceString = RIDevice.Name;
+		found->DeviceName = RIDevice.Name;
+		found->Connected = true;
+	}
+
+	OnUniqueDevicesUpdated.Broadcast();
 }
 
 bool URequence::LoadInput(bool ForceDefault)

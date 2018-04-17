@@ -12,6 +12,7 @@ ERequenceDeviceType URequenceDevice::GetDeviceTypeByKeyString(FString KeyString)
 	if (KeyString.Contains("Mouse")) { return ERequenceDeviceType::RDT_Mouse; }
 	if (KeyString.Contains("Gamepad")) { return ERequenceDeviceType::RDT_Gamepad; }
 	if (KeyString.Contains("Joystick")) { return ERequenceDeviceType::RDT_Unique; }
+	if (KeyString.Contains("Requence")) { return ERequenceDeviceType::RDT_Unique; }
 	if (KeyString.Contains("GenericUSBController")) { return ERequenceDeviceType::RDT_Unique; }
 	if (KeyString.Contains("MotionController")) { return ERequenceDeviceType::RDT_MotionController; }
 	if (KeyString.Contains("Oculus")) { return ERequenceDeviceType::RDT_MotionController; }
@@ -98,6 +99,7 @@ FString URequenceDevice::CompactifyKeyString(FString InName)
 	outName = outName.Replace(TEXT("MotionController "), TEXT(""));
 	outName = outName.Replace(TEXT("Mouse "), TEXT(""));
 	outName = outName.Replace(TEXT("Joystick"), TEXT(""));
+	outName = outName.Replace(TEXT("Requence"), TEXT(""));
 	outName = outName.Replace(TEXT("stick"), TEXT("stk"));
 	outName = outName.Replace(TEXT("button"), TEXT("btn"));
 	outName = outName.Replace(TEXT("Shift"), TEXT("shft"));

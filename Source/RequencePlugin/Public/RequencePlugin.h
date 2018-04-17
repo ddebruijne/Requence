@@ -13,8 +13,8 @@ private:
 
 public:
 	virtual TSharedPtr<class IInputDevice> CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler) override;
+	TSharedPtr<class RequenceInputDevice> InputDevice;
 
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-
 };

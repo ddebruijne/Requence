@@ -10,6 +10,8 @@
 #include "SDL.h"
 #include "SDL_joystick.h"
 
+DECLARE_MULTICAST_DELEGATE(FRIDUpdate);
+
 struct FHatData
 {
 	int HatID;
@@ -51,6 +53,7 @@ public:
 										 SDL_HAT_UP, SDL_HAT_RIGHTUP, SDL_HAT_RIGHT, SDL_HAT_RIGHTDOWN };
 	TArray<FString> _HatAxises = { "X", "Y" };
 
+	FRIDUpdate OnDevicesUpdated;
 	bool bOwnsSDL = false;
 	TArray<FSDLDeviceInfo> Devices;
 

@@ -31,5 +31,4 @@ public:
 		return FModuleManager::Get().IsModuleLoaded("RequencePlugin");
 	}
 
-	TSharedPtr<class IInputDevice> InputDevice;
 };

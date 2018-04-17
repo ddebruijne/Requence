@@ -181,6 +181,7 @@ bool RequenceInputDevice::AddDevice(int Which)
 	}
 
 	Devices.Add(Device);
+	OnDevicesUpdated.Broadcast();
 	return true;
 }
 
@@ -205,6 +206,7 @@ bool RequenceInputDevice::RemDevice(int InstanceID)
 	}
 
 	//return success.
+	OnDevicesUpdated.Broadcast();
 	return !found;
 }
 
