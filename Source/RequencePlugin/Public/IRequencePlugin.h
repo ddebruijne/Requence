@@ -30,4 +30,6 @@ public:
 	static inline bool IsAvailable() {
 		return FModuleManager::Get().IsModuleLoaded("RequencePlugin");
 	}
+
+	TSharedPtr<class IInputDevice> InputDevice;
 };

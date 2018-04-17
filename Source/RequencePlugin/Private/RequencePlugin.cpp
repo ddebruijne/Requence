@@ -16,7 +16,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogRequence, Log, All);
 TSharedPtr<class IInputDevice> FRequencePluginModule::CreateInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler)
 {
 	UE_LOG(LogRequence, Log, TEXT("Created new Input Device"));
-	return MakeShareable(new RequenceInputDevice(InMessageHandler));
+	InputDevice = MakeShareable(new RequenceInputDevice(InMessageHandler));
+	return InputDevice;
 }
 
 void FRequencePluginModule::StartupModule()

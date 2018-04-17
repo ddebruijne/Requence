@@ -30,10 +30,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAction> Actions;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAxis> Axises;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Updated = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Connected = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	URequence* RequenceRef;
 
 	URequenceDevice();
-
 
 	//Returns the device type by a bound key
 	static ERequenceDeviceType GetDeviceTypeByKeyString(FString KeyString);
