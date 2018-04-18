@@ -131,6 +131,9 @@ public:
 	//Tries to create a device by a key name. Returns a nullptr when failed.
 	UFUNCTION()						URequenceDevice* CreateDevice(FString KeyName);
 
+	//Returns all unique devices in the Devices array.
+	UFUNCTION(BlueprintCallable)	TArray<URequenceDevice*> GetUniqueDevices();
+
 	//Prints all found axises and actions.
 	UFUNCTION(BlueprintCallable)	void DebugPrint(bool UseDevices);
 

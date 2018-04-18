@@ -78,8 +78,6 @@ bool URequence::LoadUnrealInput()
 
 	FillFullAxisActionLists();
 
-	//todo: Separate unique device into separate devices.
-
 	//Add empty bindings so every device has all the mappings. Also sort alphabetically.
 	for (URequenceDevice* d : Devices)
 	{
@@ -89,6 +87,8 @@ bool URequence::LoadUnrealInput()
 		d->SortAlphabetically();
 		d->CompactifyAllKeyNames();
 	}
+
+	RequenceInputDevicesUpdated();
 
 	return true;
 }
@@ -201,8 +201,10 @@ void URequence::RequenceInputDevicesUpdated()
 			found->DeviceString = RIDevice.Name;
 			found->DeviceName = RIDevice.Name;
 			found->RequenceRef = this;
+			found->AddAllEmpty(FullAxisList, FullActionList);
+			found->SortAlphabetically();
+			found->CompactifyAllKeyNames();
 			Devices.Add(found);
-			FillFullAxisActionLists();
 		}
 
 		//Update status.
@@ -235,7 +237,11 @@ bool URequence::LoadInput(bool ForceDefault)
 				newDevice->FromStruct(SavedDevice, this, FullAxisList, FullActionList);
 				Devices.Add(newDevice);
 			}
-			if (Devices.Num() > 0) { return true; }
+			if (Devices.Num() > 0) 
+			{ 
+				RequenceInputDevicesUpdated();
+				return true; 
+			}
 		}
 	}
 
@@ -471,6 +477,21 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 	}
 
 	return nullptr;
+}
+
+TArray<URequenceDevice*> URequence::GetUniqueDevices()
+{
+	TArray<URequenceDevice*> toReturn;
+
+	for (URequenceDevice* device : Devices)
+	{
+		if (device->DeviceType == ERequenceDeviceType::RDT_Unique)
+		{
+			toReturn.Add(device);
+		}
+	}
+
+	return toReturn;
 }
 
 void URequence::DebugPrint(bool UseDevices = true)
