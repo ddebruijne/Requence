@@ -227,6 +227,7 @@ void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 	FVector2D HatInput = HatStateToVector(e->jhat.value);
 	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
 	int HatID = e->jhat.hat;
+	FVector2D OldHatState = HatStateToVector(Devices[DevID].OldHatState[HatID]);
 
 	//Button
 	FKey ButtonKey = Devices[DevID].HatKeys[HatID].Buttons[e->jhat.value];
@@ -249,14 +250,19 @@ void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 	}
 
 	//Axis
-	FKey XKey = Devices[DevID].HatKeys[HatID].Axises["X"];
-	FKey YKey = Devices[DevID].HatKeys[HatID].Axises["Y"];
+	if (OldHatState.X != HatInput.X) 
+	{
+		FKey XKey = Devices[DevID].HatKeys[HatID].Axises["X"];
+		FAnalogInputEvent XEvent(XKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, HatInput.X);
+		FSlateApplication::Get().ProcessAnalogInputEvent(XEvent);
+	}
 
-	FAnalogInputEvent XEvent(XKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, HatInput.X);
-	FAnalogInputEvent YEvent(YKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, HatInput.Y);
-
-	FSlateApplication::Get().ProcessAnalogInputEvent(XEvent);
-	FSlateApplication::Get().ProcessAnalogInputEvent(YEvent);
+	if (OldHatState.Y != HatInput.Y) 
+	{
+		FKey YKey = Devices[DevID].HatKeys[HatID].Axises["Y"];
+		FAnalogInputEvent YEvent(YKey, FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, HatInput.Y);
+		FSlateApplication::Get().ProcessAnalogInputEvent(YEvent);
+	}
 
 	Devices[DevID].OldHatState[e->jhat.hat] = e->jhat.value;
 }
