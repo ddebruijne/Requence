@@ -1,25 +1,40 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using System;
+using System.IO;
+using System.Collections.Generic;
 
 public class RequencePlugin : ModuleRules
 {
 	public RequencePlugin(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				"RequencePlugin/Public"
-				// ... add public include paths required here ...
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
+        string sdlDir = Path.GetFullPath(Path.Combine(ModuleDirectory, "../../ThirdParty"));
+
+        //Set library path
+        PublicLibraryPaths.AddRange(
+            new string[] {
+                Path.Combine(ModuleDirectory, "../../Binaries/ThirdParty", Target.Platform.ToString()),
+                Path.Combine(ModuleDirectory, "../../ThirdParty", Target.Platform.ToString())
+            }
+        );
+
+        //Include SDL headers
+        PublicIncludePaths.AddRange(
+            new string[] {
+                "RequencePlugin/Public",
+                Path.Combine(ModuleDirectory, "../../ThirdParty/include")
+  			}
+		);
+
+        PublicAdditionalLibraries.Add("SDL2.lib");
+        PublicDelayLoadDLLs.Add("SDL2.dll");
+
+
+        PrivateIncludePaths.AddRange(
 			new string[] {
 				"RequencePlugin/Private",
-				// ... add other private include paths required here ...
 			}
 			);
 			
@@ -58,5 +73,6 @@ public class RequencePlugin : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
-	}
+    }
 }
+//         PublicAdditionalLibraries.Add(Path.GetFullPath(ModuleDirectory + "/../../Binaries/" + Target.Platform.ToString() + "/SDL2.dll"));

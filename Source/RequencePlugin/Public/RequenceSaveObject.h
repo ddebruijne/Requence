@@ -33,11 +33,13 @@ public:
 	//Parameters
 	UPROPERTY(VisibleAnywhere, Category = Basic)	FString SaveSlotName;	//todo: add player name
 	UPROPERTY(VisibleAnywhere, Category = Basic)	uint32 UserIndex;		//todo: dynamic user slots
+	UPROPERTY(VisibleAnywhere, Category = Basic)	uint32 RequenceVersion; 
 
 	URequenceSaveObject() 
 	{
 		SaveSlotName = TEXT("RequenceInputSaveObject");
 		UserIndex = 0;
+		RequenceVersion = -1;
 	}
 	
 };

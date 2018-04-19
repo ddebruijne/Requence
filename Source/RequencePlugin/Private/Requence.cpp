@@ -7,8 +7,25 @@
 #include "JsonSerializer.h"
 #include "PlatformFilemanager.h"
 #include "FileHelper.h"
+#include "RequencePlugin.h"
 
-URequence::URequence() {}
+URequence::URequence() 
+{
+	FRequencePluginModule& RPM = FModuleManager::LoadModuleChecked<FRequencePluginModule>("RequencePlugin");
+	if (RPM.InputDevice.IsValid())
+	{
+		RPM.InputDevice->OnDevicesUpdated.AddUFunction(this, FName("RequenceInputDevicesUpdated"));
+	}
+}
+
+URequence::~URequence() 
+{
+	FRequencePluginModule& RPM = FModuleManager::LoadModuleChecked<FRequencePluginModule>("RequencePlugin");
+	if (RPM.InputDevice.IsValid())
+	{
+		RPM.InputDevice->OnDevicesUpdated.RemoveAll(this);
+	}
+}
 
 bool URequence::LoadUnrealInput()
 {
@@ -61,8 +78,6 @@ bool URequence::LoadUnrealInput()
 
 	FillFullAxisActionLists();
 
-	//todo: Separate unique device into separate devices.
-
 	//Add empty bindings so every device has all the mappings. Also sort alphabetically.
 	for (URequenceDevice* d : Devices)
 	{
@@ -72,6 +87,8 @@ bool URequence::LoadUnrealInput()
 		d->SortAlphabetically();
 		d->CompactifyAllKeyNames();
 	}
+
+	RequenceInputDevicesUpdated();
 
 	return true;
 }
@@ -141,25 +158,37 @@ bool URequence::LoadInput(bool ForceDefault)
 	else
 	{
 		RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::LoadGameFromSlot(RSO_Instance->SaveSlotName, RSO_Instance->UserIndex));
-		if (RSO_Instance->Devices.Num() > 0)
+		if (RSO_Instance->Devices.Num() <= 0) { return false; }
+
+		//If the version does not match, force defaults.
+		if (RSO_Instance->RequenceVersion != Version) 
 		{
-			FillFullAxisActionLists();
-			for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
-			{
-				URequenceDevice* newDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
-				newDevice->FromStruct(SavedDevice, this, FullAxisList, FullActionList);
-				Devices.Add(newDevice);
-			}
-			if (Devices.Num() > 0) { return true; }
+			UE_LOG(LogTemp, Warning, TEXT("Requence version %i tried to load save file with version %i. Forcing defaults."), Version, RSO_Instance->RequenceVersion)
+				RSO_Instance->Devices.Empty();
+			return LoadInput(true);
+		}
+
+		//If we have enough devices in here, fill it up.
+		FillFullAxisActionLists();
+		for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
+		{
+			URequenceDevice* newDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+			newDevice->FromStruct(SavedDevice, this, FullAxisList, FullActionList);
+			Devices.Add(newDevice);
+		}
+		if (Devices.Num() > 0)
+		{
+			RequenceInputDevicesUpdated();
+			return true;
 		}
 	}
-
 	return false;
 }
 
 bool URequence::SaveInput()
 {
 	URequenceSaveObject* RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::CreateSaveGameObject(URequenceSaveObject::StaticClass()));
+	RSO_Instance->RequenceVersion = Version;
 	for (URequenceDevice* Device : Devices)
 	{
 		RSO_Instance->Devices.Add(Device->ToStruct());
@@ -234,6 +263,76 @@ void URequence::OnGameStartup()
 	return;
 }
 
+void URequence::RequenceInputDevicesUpdated()
+{
+	for (URequenceDevice* URDevice : Devices) {
+		URDevice->Connected = false;
+	}
+
+	FRequencePluginModule& RPM = FModuleManager::LoadModuleChecked<FRequencePluginModule>("RequencePlugin");
+	if (!RPM.InputDevice.IsValid()) { return; }
+
+	for (FSDLDeviceInfo RIDevice : RPM.InputDevice->Devices)
+	{
+		URequenceDevice* found = nullptr;
+		//Try and match the InputDevice to the Stored Device.
+		for (URequenceDevice* URDevice : Devices)
+		{
+			//match on name
+			if (RIDevice.Name == URDevice->DeviceString)
+			{
+				found = URDevice;
+			}
+			if (found) break;
+
+			//match on action keys
+			for (FRequenceInputAction ac : URDevice->Actions)
+			{
+				if (ac.KeyString.Contains(RIDevice.Name))
+				{
+					found = URDevice;
+					break;
+				}
+			}
+			if (found) break;
+
+			//match on axis key.
+			for (FRequenceInputAxis ax : URDevice->Axises)
+			{
+				if (ax.KeyString.Contains(RIDevice.Name))
+				{
+					found = URDevice;
+					break;
+				}
+			}
+			if (found) break;
+
+			//When all else failed.
+			URDevice->Connected = false;
+		}
+
+		//No device found. Create one!
+		if (!found) {
+			found = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+			found->DeviceType = ERequenceDeviceType::RDT_Unique;
+			found->DeviceString = RIDevice.Name;
+			found->DeviceName = RIDevice.Name;
+			found->RequenceRef = this;
+			found->AddAllEmpty(FullAxisList, FullActionList);
+			found->SortAlphabetically();
+			found->CompactifyAllKeyNames();
+			Devices.Add(found);
+		}
+
+		//Update status.
+		found->DeviceString = RIDevice.Name;
+		found->DeviceName = RIDevice.Name;
+		found->Connected = true;
+	}
+
+	OnUniqueDevicesUpdated.Broadcast();
+}
+
 void URequence::ExportDeviceAsPreset(URequenceDevice* Device)
 {
 	//Serialize JSON
@@ -276,6 +375,10 @@ bool URequence::ImportDeviceAsPreset(FString AbsolutePath)
 			if (JsonDevice->TryGetStringField(TEXT("DeviceType"), sDeviceType))
 			{
 				FillFullAxisActionLists();
+
+				//todo: return proper file error.
+				uint32 jsonver = JsonDevice->GetNumberField(TEXT("RequenceVersion"));
+				if (jsonver != Version) { return false; }
 
 				URequenceDevice* NewDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
 				NewDevice->DeviceType = StringToEnum<ERequenceDeviceType>("ERequenceDeviceType", sDeviceType);
@@ -386,6 +489,21 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 	}
 
 	return nullptr;
+}
+
+TArray<URequenceDevice*> URequence::GetUniqueDevices()
+{
+	TArray<URequenceDevice*> toReturn;
+
+	for (URequenceDevice* device : Devices)
+	{
+		if (device->DeviceType == ERequenceDeviceType::RDT_Unique)
+		{
+			toReturn.Add(device);
+		}
+	}
+
+	return toReturn;
 }
 
 void URequence::DebugPrint(bool UseDevices = true)

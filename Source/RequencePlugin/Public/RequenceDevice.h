@@ -12,11 +12,10 @@
 class URequence;
 
 /*
-*  Impeller Studios (2018)
+*  Danny de Bruijne (2018)
 *  RequenceDevice
-*  Contributors: Danny de Bruijne
-*
-*  ...
+*  
+*  Devices supported by requence containing key rebind functionality.
 */
 UCLASS(EditInlineNew, Meta = (BlueprintSpawnableComponent))
 class REQUENCEPLUGIN_API URequenceDevice : public UObject
@@ -30,10 +29,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAction> Actions;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)		TArray<FRequenceInputAxis> Axises;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Updated = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Connected = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	URequence* RequenceRef;
 
 	URequenceDevice();
-
 
 	//Returns the device type by a bound key
 	static ERequenceDeviceType GetDeviceTypeByKeyString(FString KeyString);
@@ -52,7 +51,7 @@ public:
 	UFUNCTION(BlueprintCallable) FRequenceInputAxis UpdateKeyStringAxis(FRequenceInputAxis Axis, bool bDoCompactify);
 
 	//Generates a new keystring axis
-	UFUNCTION(BlueprintCallable) FString GenerateKeyString(FKey key, bool bDoCompactify, bool bShift, bool bCtrl, bool bCmd, bool bAlt);
+	UFUNCTION(BlueprintCallable) FString GenerateKeyString(FKey key, bool bDoCompactify);
 
 	//Filters the name of an key so it's more compact.
 	UFUNCTION(BlueprintCallable) FString CompactifyKeyString(FString InName);
@@ -68,6 +67,7 @@ public:
 
 	//Removes all actions and axises that are no longer found in the full action/axis list. returns whether axises are removed.
 	UFUNCTION() bool FilterDeleted(TArray<FString> FullAxisList, TArray<FString> FullActionList);
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Axis/Action manipulation

@@ -11,25 +11,26 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRequenceOnEditModeStarted, ERequenceDeviceType, DeviceType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRequenceOnEditModeEnded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRequenceUpdatedUniqueDevices);
 
 /*
-*  Impeller Studios (2018)
+*  Danny de Bruijne (2018)
 *  Requence
-*  Contributors: Danny de Bruijne
 *
 *  Input system back-end created for Starfighter inc.
 *  Documentation: https://goo.gl/BzAUdq
-*
-*  Dependencies:
-*  - JoystickPlugin 
 */
 UCLASS(EditInlineNew, Meta=(BlueprintSpawnableComponent))
 class REQUENCEPLUGIN_API URequence : public UObject
 {
 	GENERATED_BODY()
+private:
+	//Version of Requence. If this number is different than it is in the save file, it will clear the save to ensure compatibility.
+	UPROPERTY()						int Version = 1;
 
 public:
 	URequence();
+	~URequence();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Data
@@ -67,6 +68,9 @@ public:
 	//Called when Edit Mode has ended
 	UPROPERTY(BlueprintAssignable)	FRequenceOnEditModeEnded OnEditModeEnded;
 
+	//Called when we've updated our RID's - Update your unique devices UI when this is called. (eg connection/disconnection and name change.)
+	UPROPERTY(BlueprintAssignable)	FRequenceUpdatedUniqueDevices OnUniqueDevicesUpdated;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Core functions
@@ -89,12 +93,14 @@ public:
 
 	//Function to run on game startup. Loads in Save game and applies custom inputs to runtime.
 	UFUNCTION(BlueprintCallable)	void OnGameStartup();
-
+private:
+	//Delegate callback for when RID devices are updated.
+	UFUNCTION()						void RequenceInputDevicesUpdated();
 
 	//////////////////////////////////////////////////////////////////////////
 	//Importing / Exporting 
 	//////////////////////////////////////////////////////////////////////////
-
+public:
 	//Exports a given device to JSON format.
 	UFUNCTION(BlueprintCallable)	void ExportDeviceAsPreset(URequenceDevice* Device);	
 	
@@ -121,6 +127,9 @@ public:
 	//Tries to create a device by a key name. Returns a nullptr when failed.
 	UFUNCTION()						URequenceDevice* CreateDevice(FString KeyName);
 
+	//Returns all unique devices in the Devices array.
+	UFUNCTION(BlueprintCallable)	TArray<URequenceDevice*> GetUniqueDevices();
+
 	//Prints all found axises and actions.
 	UFUNCTION(BlueprintCallable)	void DebugPrint(bool UseDevices);
 
@@ -141,4 +150,7 @@ public:
 
 	//Ends edit mode.
 	UFUNCTION(BlueprintCallable)	void SetEditModeEnded();
+
+	//Returns the requence version number.
+	UFUNCTION(BlueprintCallable)	int GetVersion() { return Version; }
 };

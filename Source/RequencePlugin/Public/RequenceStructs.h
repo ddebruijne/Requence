@@ -38,6 +38,15 @@ enum class ERequenceDeviceType : uint8
 	RDT_Unique				UMETA(DisplayName = "Unique Device")
 };
 
+//Load errors for save files and 
+UENUM(BlueprintType)
+enum class ERequenceLoadError : uint8
+{
+	RLE_Unknown				UMETA(DisplayName = "Unknown"),
+	RLE_WrongVersion		UMETA(DisplayName = "Wrong Version"),
+	RLE_FileNotFound		UMETA(DisplayName = "File not found")
+};
+
 USTRUCT(BlueprintType)
 struct FRequenceInputAction
 {
@@ -90,9 +99,8 @@ public:
 };
 
 /*
-*  Impeller Studios (2017)
+*  Danny de Bruijne (2018)
 *  RequenceStructs
-*  Contributors: Danny de Bruijne
 *
 *  Data structs used by Requence
 */
