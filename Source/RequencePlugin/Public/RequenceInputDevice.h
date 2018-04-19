@@ -41,9 +41,12 @@ struct FSDLDeviceInfo
 	FSDLDeviceInfo() {}
 };
 
-/**
- * 
- */
+/*
+*  Danny de Bruijne (2018)
+*  RequenceInputDevice
+*
+*  Code to handle SDL joysticks as input devices.
+*/
 class REQUENCEPLUGIN_API RequenceInputDevice : public IInputDevice
 {
 public:

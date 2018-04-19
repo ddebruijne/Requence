@@ -52,9 +52,15 @@ void RequenceInputDevice::InitSDL()
 		UE_LOG(LogTemp, Log, TEXT("Initialized Joystick subsystem"));
 	}
 
+	if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) == 0)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Initialized Controller subsystem"));
+	}
+
 	for (int i = 0; i < SDL_NumJoysticks(); i++) 
 	{
 		AddDevice(i);
+		
 	}
 
 	SDL_AddEventWatch(HandleSDLEvent, this);
@@ -91,6 +97,8 @@ int RequenceInputDevice::HandleSDLEvent(void* UserData, SDL_Event* Event)
 
 bool RequenceInputDevice::AddDevice(int Which)
 {
+	if (SDL_IsGameController(Which) == SDL_TRUE) { return false; }
+
 	//It's already in!
 	for (FSDLDeviceInfo d : Devices) {
 		if (d.Which == Which) { return false; }
@@ -225,9 +233,11 @@ void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 	if (!bOwnsSDL) { return; }
 
 	FVector2D HatInput = HatStateToVector(e->jhat.value);
-	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	const int DevID = GetDeviceIndexByWhich(e->jdevice.which);
 	int HatID = e->jhat.hat;
 	FVector2D OldHatState = HatStateToVector(Devices[DevID].OldHatState[HatID]);
+
+	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
 
 	//Button
 	FKey ButtonKey = Devices[DevID].HatKeys[HatID].Buttons[e->jhat.value];
@@ -275,6 +285,7 @@ void RequenceInputDevice::HandleInput_Button(SDL_Event* e)
 	int ButtonID = e->jbutton.button;
 	bool NewButtonState = (e->jbutton.state > 0) ? true : false;
 
+	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
 	if (!Devices[DevID].Buttons.Contains(ButtonID)) { return; }
 
 	if (NewButtonState)
@@ -303,6 +314,7 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 	int AxisID = e->jaxis.axis;
 	float NewAxisState = FMath::Clamp(e->jaxis.value / (e->jaxis.value < 0 ? 32768.0f : 32767.0f), -1.f, 1.f);
 
+	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
 	if (!Devices[DevID].Axises.Contains(AxisID)) { return; }
 
 	FAnalogInputEvent AxisEvent(Devices[DevID].Axises[AxisID], 
