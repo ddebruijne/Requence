@@ -14,14 +14,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRequenceOnEditModeEnded);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRequenceUpdatedUniqueDevices);
 
 /*
-*  Impeller Studios (2018)
+*  Danny de Bruijne (2018)
 *  Requence
 *
 *  Input system back-end created for Starfighter inc.
 *  Documentation: https://goo.gl/BzAUdq
-*
-*  Dependencies:
-*  - JoystickPlugin 
 */
 UCLASS(EditInlineNew, Meta=(BlueprintSpawnableComponent))
 class REQUENCEPLUGIN_API URequence : public UObject
@@ -84,9 +81,6 @@ private:
 
 	//Places our format safely back as Input.ini. Returns false if failed. Note that this function should be avoided and use the Requence save file.
 	UFUNCTION()						bool SaveUnrealInput(bool Force);		
-
-	//Delegate callback for when RID devices are updated.
-	UFUNCTION()						void RequenceInputDevicesUpdated();
 public:
 	//Load in Requence save file. If it does not exist (since nothing is customized) we load in UE4's Defaults. Returns success. If ForceDefault is true all devices will be reset to their default bindings.
 	UFUNCTION(BlueprintCallable)	bool LoadInput(bool ForceDefault);
@@ -99,12 +93,14 @@ public:
 
 	//Function to run on game startup. Loads in Save game and applies custom inputs to runtime.
 	UFUNCTION(BlueprintCallable)	void OnGameStartup();
-
+private:
+	//Delegate callback for when RID devices are updated.
+	UFUNCTION()						void RequenceInputDevicesUpdated();
 
 	//////////////////////////////////////////////////////////////////////////
 	//Importing / Exporting 
 	//////////////////////////////////////////////////////////////////////////
-
+public:
 	//Exports a given device to JSON format.
 	UFUNCTION(BlueprintCallable)	void ExportDeviceAsPreset(URequenceDevice* Device);	
 	
@@ -154,4 +150,7 @@ public:
 
 	//Ends edit mode.
 	UFUNCTION(BlueprintCallable)	void SetEditModeEnded();
+
+	//Returns the requence version number.
+	UFUNCTION(BlueprintCallable)	int GetVersion() { return Version; }
 };

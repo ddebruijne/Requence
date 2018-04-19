@@ -267,7 +267,7 @@ void RequenceInputDevice::HandleInput_Button(SDL_Event* e)
 
 	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
 	int ButtonID = e->jbutton.button;
-	bool NewButtonState = e->jbutton.state;
+	bool NewButtonState = (e->jbutton.state > 0) ? true : false;
 
 	if (!Devices[DevID].Buttons.Contains(ButtonID)) { return; }
 

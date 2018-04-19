@@ -68,24 +68,20 @@ void URequenceDevice::CompactifyAllKeyNames()
 FRequenceInputAction URequenceDevice::UpdateKeyStringAction(FRequenceInputAction Action, bool bDoCompactify)
 {
 	FRequenceInputAction toReturn = Action;
-	if (Action.Key != FKey()) { toReturn.KeyString = GenerateKeyString(toReturn.Key, bDoCompactify, toReturn.bShift, toReturn.bCtrl, toReturn.bCmd, toReturn.bAlt); }
+	if (Action.Key != FKey()) { toReturn.KeyString = GenerateKeyString(toReturn.Key, bDoCompactify); }
 	return toReturn;
 }
 
 FRequenceInputAxis URequenceDevice::UpdateKeyStringAxis(FRequenceInputAxis Axis, bool bDoCompactify)
 {
 	FRequenceInputAxis toReturn = Axis;
-	if (Axis.Key != FKey()) { toReturn.KeyString = GenerateKeyString(toReturn.Key, bDoCompactify, false, false, false, false); }
+	if (Axis.Key != FKey()) { toReturn.KeyString = GenerateKeyString(toReturn.Key, bDoCompactify); }
 	return toReturn;
 }
 
-FString URequenceDevice::GenerateKeyString(FKey key, bool bDoCompactify, bool bShift, bool bCtrl, bool bCmd, bool bAlt)
+FString URequenceDevice::GenerateKeyString(FKey key, bool bDoCompactify)
 {
 	FString toReturn;
-	if (bShift) { toReturn.Append("Shift + "); }
-	if (bCtrl) { toReturn.Append("Control + "); }
-	if (bCmd) { toReturn.Append("Command + "); }
-	if (bAlt) { toReturn.Append("Alt + "); }
 	toReturn.Append(key.GetDisplayName().ToString());
 	if (bDoCompactify) { toReturn = CompactifyKeyString(toReturn); }
 	return toReturn;
@@ -481,6 +477,10 @@ TSharedPtr<FJsonObject> URequenceDevice::GetDeviceAsJson()
 	Preset->SetArrayField("Actions", GetActionsAsJson());
 	Preset->SetArrayField("Axises", GetAxisesAsJson());
 	Preset->SetStringField("Timestamp", FDateTime::Now().ToString());
+	if (IsValid(RequenceRef))
+	{
+		Preset->SetNumberField("RequenceVersion", RequenceRef->GetVersion());
+	}
 
 	return Preset;
 }
