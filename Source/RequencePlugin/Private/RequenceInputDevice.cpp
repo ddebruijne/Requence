@@ -233,11 +233,11 @@ void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 	if (!bOwnsSDL) { return; }
 
 	FVector2D HatInput = HatStateToVector(e->jhat.value);
-	const int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
 	int HatID = e->jhat.hat;
-	FVector2D OldHatState = HatStateToVector(Devices[DevID].OldHatState[HatID]);
 
 	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
+	FVector2D OldHatState = HatStateToVector(Devices[DevID].OldHatState[HatID]);
 
 	//Button
 	FKey ButtonKey = Devices[DevID].HatKeys[HatID].Buttons[e->jhat.value];
