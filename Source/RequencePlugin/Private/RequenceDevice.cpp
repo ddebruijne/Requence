@@ -378,16 +378,17 @@ bool URequenceDevice::RebindAxis(FRequenceInputAxis OldAxis, FRequenceInputAxis 
 	return false;
 }
 
-bool URequenceDevice::DeleteAction(FString ActionName)
+bool URequenceDevice::DeleteActionKeys(FString ActionName)
 {
 	int deleted = 0;
 	if (Actions.Num() > 0) 
 	{
-		for (int i = Actions.Num() -1; i >= 0; i--)
+		for (int i = 0; i < Actions.Num(); i++)
 		{
 			if (Actions[i].ActionName == ActionName)
 			{
-				Actions.RemoveAt(i);
+				FString temp = Actions[i].ActionName;
+				Actions[i] = FRequenceInputAction(temp, FKey(), false, false, false, false);
 				deleted++;
 				Updated = true;
 			}
@@ -397,16 +398,17 @@ bool URequenceDevice::DeleteAction(FString ActionName)
 	return false;
 }
 
-bool URequenceDevice::DeleteAxis(FString AxisName)
+bool URequenceDevice::DeleteAxisKeys(FString AxisName)
 {
 	int deleted = 0;
 	if (Axises.Num() > 0)
 	{
-		for (int i = Axises.Num() -1; i >= 0; i--)
+		for (int i = 0; i < Axises.Num(); i++)
 		{
 			if (Axises[i].AxisName == AxisName)
 			{
-				Axises.RemoveAt(i);
+				FString temp = Axises[i].AxisName;
+				Axises[i] = FRequenceInputAxis(temp, FKey(), 1);
 				deleted++;
 				Updated = true;
 			}

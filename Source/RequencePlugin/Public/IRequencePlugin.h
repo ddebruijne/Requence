@@ -2,7 +2,6 @@
 
 #include "ModuleManager.h"
 #include "IInputDeviceModule.h"
-
 #include "InputCoreTypes.h"
 
 /**

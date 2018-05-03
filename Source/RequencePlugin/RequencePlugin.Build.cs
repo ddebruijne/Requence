@@ -7,9 +7,9 @@ using System.Collections.Generic;
 
 public class RequencePlugin : ModuleRules
 {
-	public RequencePlugin(ReadOnlyTargetRules Target) : base(Target)
+    public RequencePlugin(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+        PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
         string sdlDir = Path.GetFullPath(Path.Combine(ModuleDirectory, "../../ThirdParty"));
 
         //Set library path
@@ -36,7 +36,7 @@ public class RequencePlugin : ModuleRules
 			new string[] {
 				"RequencePlugin/Private",
 			}
-			);
+		);
 			
 		
 		PublicDependencyModuleNames.AddRange(
@@ -55,6 +55,12 @@ public class RequencePlugin : ModuleRules
 			}
 			);
 			
+		
+		PrivateIncludePathModuleNames.AddRange(
+			new string[]
+			{
+				"InputDevice",
+			});
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]

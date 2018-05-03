@@ -63,7 +63,7 @@ public:
 	UFUNCTION(BlueprintCallable) bool StartEditMode();
 
 	//Adds all not-found axises and actions from the full action list.
-	UFUNCTION()	void AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList, int numRequired = 1);
+	UFUNCTION()	void AddAllEmpty(TArray<FString> FullAxisList, TArray<FString> FullActionList, int numRequired = 2);
 
 	//Removes all actions and axises that are no longer found in the full action/axis list. returns whether axises are removed.
 	UFUNCTION() bool FilterDeleted(TArray<FString> FullAxisList, TArray<FString> FullActionList);
@@ -98,10 +98,10 @@ public:
 	UFUNCTION(BlueprintCallable) bool RebindAxis(FRequenceInputAxis OldAxis, FRequenceInputAxis UpdatedAxis);
 
 	//Deletes action by string. returns success. bLeaveActionName leaves your struct in the array if you don't want to create news but rebind
-	UFUNCTION(BlueprintCallable) bool DeleteAction(FString ActionName);
+	UFUNCTION(BlueprintCallable) bool DeleteActionKeys(FString ActionName);
 
 	//Deletes axis by string. returns success. bLeaveAxisName leaves your struct in the array if you don't want to create news but rebind
-	UFUNCTION(BlueprintCallable) bool DeleteAxis(FString AxisName);
+	UFUNCTION(BlueprintCallable) bool DeleteAxisKeys(FString AxisName);
 
 
 	//////////////////////////////////////////////////////////////////////////

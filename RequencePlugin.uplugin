@@ -7,18 +7,11 @@
 	"Category": "Other",
 	"CreatedBy": "Danny de Bruijne",
 	"CreatedByURL": "https://dannydebruijne.com",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"SupportURL": "",
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"Installed": false,
 	"Modules": [
 		{
 			"Name": "RequencePlugin",
 			"Type": "Runtime",
-      "LoadingPhase": "PreDefault",
-      "WhitelistPlatforms": ["Win64", "Win32"]
+      		"WhitelistPlatforms": ["Win64", "Win32"]
 		}
 	]
 }
