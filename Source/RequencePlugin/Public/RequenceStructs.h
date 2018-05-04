@@ -73,6 +73,10 @@ public:
 	{
 		ActionName = Action.ActionName.ToString();
 	}
+	FRequenceInputAction(const FString InActionName) : ActionName(InActionName) 
+	{
+		Key = FKey();
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -95,6 +99,10 @@ public:
 		: Key(Axis.Key), KeyString(Axis.Key.GetDisplayName().ToString()), Scale(Axis.Scale)
 	{
 		AxisName = Axis.AxisName.ToString();
+	}
+	FRequenceInputAxis(const FString InAxisName) : AxisName(InAxisName) 
+	{
+		Key = FKey();
 	}
 };
 

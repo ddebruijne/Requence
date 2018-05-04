@@ -388,7 +388,7 @@ bool URequenceDevice::DeleteActionKeys(FString ActionName)
 			if (Actions[i].ActionName == ActionName)
 			{
 				FString temp = Actions[i].ActionName;
-				Actions[i] = FRequenceInputAction(temp, FKey(), false, false, false, false);
+				Actions[i] = FRequenceInputAction(temp);
 				deleted++;
 				Updated = true;
 			}
@@ -408,7 +408,7 @@ bool URequenceDevice::DeleteAxisKeys(FString AxisName)
 			if (Axises[i].AxisName == AxisName)
 			{
 				FString temp = Axises[i].AxisName;
-				Axises[i] = FRequenceInputAxis(temp, FKey(), 1);
+				Axises[i] = FRequenceInputAxis(temp);
 				deleted++;
 				Updated = true;
 			}
