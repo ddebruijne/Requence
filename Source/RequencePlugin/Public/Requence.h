@@ -20,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRequenceUpdatedUniqueDevices);
 *  Input system back-end created for Starfighter inc.
 *  Documentation: https://goo.gl/BzAUdq
 */
-UCLASS(EditInlineNew, Meta=(BlueprintSpawnableComponent))
+UCLASS(EditInlineNew, Meta=(BlueprintSpawnableComponent), BlueprintType)
 class REQUENCEPLUGIN_API URequence : public UObject
 {
 	GENERATED_BODY()
