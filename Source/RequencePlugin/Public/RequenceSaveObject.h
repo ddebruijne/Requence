@@ -17,6 +17,8 @@ public:
 	UPROPERTY()		ERequenceDeviceType DeviceType = ERequenceDeviceType::RDT_Unknown;
 	UPROPERTY()		TArray<FRequenceInputAction> Actions;	//Note: filtered without empty actions. 
 	UPROPERTY()		TArray<FRequenceInputAxis> Axises;		//Note: filtered without empty actions.
+	UPROPERTY()		TArray<FString> PhysicalButtons;
+	UPROPERTY()		TArray<FString> PhysicalAxises;
 
 	FRequenceSaveObjectDevice() {}
 };

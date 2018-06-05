@@ -32,6 +32,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool Connected = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	URequence* RequenceRef;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	TArray<FString> PhysicalButtons;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	TArray<FString> PhysicalAxises;
+
 	URequenceDevice();
 
 	//Returns the device type by a bound key

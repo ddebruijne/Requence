@@ -426,6 +426,8 @@ void URequenceDevice::FromStruct(FRequenceSaveObjectDevice StructIn, URequence* 
 	DeviceType = StructIn.DeviceType;
 	Actions = StructIn.Actions;
 	Axises = StructIn.Axises;
+	PhysicalAxises = StructIn.PhysicalAxises;
+	PhysicalButtons = StructIn.PhysicalButtons;
 	RequenceRef = _RequenceRef;
 
 	AddAllEmpty(FullAxisList, FullActionList);
@@ -441,6 +443,8 @@ FRequenceSaveObjectDevice URequenceDevice::ToStruct()
 	toReturn.DeviceType = DeviceType;
 	toReturn.Actions = Actions;
 	toReturn.Axises = Axises;
+	toReturn.PhysicalAxises = PhysicalAxises;
+	toReturn.PhysicalButtons = PhysicalButtons;
 
 	//Filter empty keys
 	if (toReturn.Actions.Num() > 0)
@@ -478,6 +482,23 @@ TSharedPtr<FJsonObject> URequenceDevice::GetDeviceAsJson()
 
 	Preset->SetArrayField("Actions", GetActionsAsJson());
 	Preset->SetArrayField("Axises", GetAxisesAsJson());
+
+	TArray<TSharedPtr<FJsonValue>> btns;
+	for (FString str : PhysicalButtons) 
+	{
+		TSharedPtr<FJsonValueString> val = MakeShareable(new FJsonValueString(str));
+		btns.Add(val);
+	}
+	Preset->SetArrayField("PhysicalButtons", btns);
+
+	TArray<TSharedPtr<FJsonValue>> axises;
+	for (FString str : PhysicalAxises)
+	{
+		TSharedPtr<FJsonValueString> val = MakeShareable(new FJsonValueString(str));
+		btns.Add(val);
+	}
+	Preset->SetArrayField("PhysicalAxises", btns);
+
 	Preset->SetStringField("Timestamp", FDateTime::Now().ToString());
 	if (IsValid(RequenceRef))
 	{

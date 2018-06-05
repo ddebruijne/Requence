@@ -321,6 +321,16 @@ void URequence::RequenceInputDevicesUpdated()
 			found->AddAllEmpty(FullAxisList, FullActionList);
 			found->SortAlphabetically();
 			found->CompactifyAllKeyNames();
+
+			for (auto& Axises : RIDevice.Axises)
+			{
+				found->PhysicalAxises.Add(Axises.Value.ToString());
+			}
+			for (auto& Buttons : RIDevice.Buttons)
+			{
+				found->PhysicalButtons.Add(Buttons.Value.ToString());
+			}
+
 			Devices.Add(found);
 		}
 
