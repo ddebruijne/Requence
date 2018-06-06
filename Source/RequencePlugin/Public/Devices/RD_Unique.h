@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "RequenceDevice.h"
 #include "../RequenceInputDevice.h"
+#include "../RequenceStructs.h"
 #include "RD_Unique.generated.h"
 
 UCLASS()
@@ -15,9 +16,15 @@ class REQUENCEPLUGIN_API URD_Unique : public URequenceDevice
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool bHasPhysicalData = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	TArray<FString> PhysicalButtons;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	TArray<FString> PhysicalAxises;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	TArray<FRequencePhysicalAxis> PhysicalAxises;
 	
 	void LoadDefaultPhysicalData(FSDLDeviceInfo Data);
+
+	UFUNCTION(BlueprintCallable)
+	FRequencePhysicalAxis GetPhysicalAxisByName(FString PhysicalAxisName);
+
+	UFUNCTION(BlueprintCallable)
+	bool UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D> DataPoints);
 
 	//////////////////////////////////////////////////////////////////////////
 	// JSON Import/Export

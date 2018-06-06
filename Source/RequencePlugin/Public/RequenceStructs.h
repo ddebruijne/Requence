@@ -48,6 +48,20 @@ enum class ERequenceLoadError : uint8
 };
 
 USTRUCT(BlueprintType)
+struct FRequencePhysicalAxis
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString Axis;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FVector2D> DataPoints;
+
+	FRequencePhysicalAxis() {}
+	FRequencePhysicalAxis(FString _Axis) { Axis = _Axis; }
+};
+
+USTRUCT(BlueprintType)
 struct FRequenceInputAction
 {
 	GENERATED_USTRUCT_BODY()

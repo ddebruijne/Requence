@@ -9,7 +9,7 @@ void URD_Unique::LoadDefaultPhysicalData(FSDLDeviceInfo Data)
 
 	for (auto& Axises : Data.Axises)
 	{
-		PhysicalAxises.Add(Axises.Value.ToString());
+		PhysicalAxises.Add(FRequencePhysicalAxis(Axises.Value.ToString()));
 	}
 	for (auto& Buttons : Data.Buttons)
 	{
@@ -21,15 +21,52 @@ void URD_Unique::LoadDefaultPhysicalData(FSDLDeviceInfo Data)
 	bHasPhysicalData = true;
 }
 
+FRequencePhysicalAxis URD_Unique::GetPhysicalAxisByName(FString PhysicalAxisName)
+{
+	for (FRequencePhysicalAxis pa : PhysicalAxises) 
+	{
+		if (pa.Axis == PhysicalAxisName) { return pa; }
+	}
+
+	return FRequencePhysicalAxis();
+}
+
+bool URD_Unique::UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D> DataPoints)
+{
+	for (int i = 0; i < PhysicalAxises.Num(); i++) 
+	{
+		if (PhysicalAxises[i].Axis == AxisName) {
+			PhysicalAxises[i].DataPoints = DataPoints;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 TSharedPtr<FJsonObject> URD_Unique::GetDeviceAsJson()
 {
 	TSharedPtr<FJsonObject> Preset = URequenceDevice::GetDeviceAsJson();
 
 	TArray<TSharedPtr<FJsonValue>> axises;
-	for (FString str : PhysicalAxises)
+	for (FRequencePhysicalAxis pa : PhysicalAxises)
 	{
-		TSharedPtr<FJsonValueString> val = MakeShareable(new FJsonValueString(str));
-		axises.Add(val);
+		TSharedPtr<FJsonObject> JSONPhysicalAxis = MakeShareable(new FJsonObject);
+		JSONPhysicalAxis->SetStringField("Axis", pa.Axis);
+
+		TArray<TSharedPtr<FJsonValue>> datapoints;
+		for (FVector2D dp : pa.DataPoints) {
+			TSharedPtr<FJsonObject> datapoint = MakeShareable(new FJsonObject);
+			datapoint->SetNumberField("X", dp.X);
+			datapoint->SetNumberField("Y", dp.Y);
+
+			TSharedRef<FJsonValueObject> datapointvalue = MakeShareable(new FJsonValueObject(datapoint));
+			datapoints.Add(datapointvalue);
+		}
+		JSONPhysicalAxis->SetArrayField("CurveDataPoints", datapoints);
+
+		TSharedRef<FJsonValueObject> PhysicalAxisValue = MakeShareable(new FJsonValueObject(JSONPhysicalAxis));
+		axises.Add(PhysicalAxisValue);
 	}
 	Preset->SetArrayField("PhysicalAxises", axises);
 

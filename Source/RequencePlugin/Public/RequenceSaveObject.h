@@ -21,7 +21,7 @@ public:
 
 	//Unique device data
 	UPROPERTY()		TArray<FString> PhysicalButtons;
-	UPROPERTY()		TArray<FString> PhysicalAxises;
+	UPROPERTY()		TArray<FRequencePhysicalAxis> PhysicalAxises;
 
 	FRequenceSaveObjectDevice() {}
 };

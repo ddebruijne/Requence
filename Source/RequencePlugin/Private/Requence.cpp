@@ -200,9 +200,17 @@ bool URequence::SaveInput()
 {
 	URequenceSaveObject* RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::CreateSaveGameObject(URequenceSaveObject::StaticClass()));
 	RSO_Instance->RequenceVersion = Version;
+
 	for (URequenceDevice* Device : Devices)
 	{
-		RSO_Instance->Devices.Add(Device->ToStruct());
+		if (Device->DeviceType == ERequenceDeviceType::RDT_Unique) 
+		{
+			RSO_Instance->Devices.Add(Cast<URD_Unique>(Device)->ToStruct());
+		}
+		else 
+		{
+			RSO_Instance->Devices.Add(Device->ToStruct());
+		}
 	}
 	if (RSO_Instance->Devices.Num() > 0)
 	{
