@@ -8,6 +8,7 @@
 #include "PlatformFilemanager.h"
 #include "FileHelper.h"
 #include "RequencePlugin.h"
+#include "RD_Unique.h"
 
 URequence::URequence() 
 {
@@ -44,6 +45,7 @@ bool URequence::LoadUnrealInput()
  		//Grab device
 		ERequenceDeviceType erdt = URequenceDevice::GetDeviceTypeByKeyString(FRIAc.KeyString);
 		URequenceDevice* device = GetDeviceByType(erdt);
+
 		if (IsValid(device)) 
 		{	//Add to current device
 			device->AddAction(FRIAc);
@@ -172,9 +174,18 @@ bool URequence::LoadInput(bool ForceDefault)
 		FillFullAxisActionLists();
 		for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
 		{
-			URequenceDevice* newDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
-			newDevice->FromStruct(SavedDevice, this, FullAxisList, FullActionList);
-			Devices.Add(newDevice);
+			if (SavedDevice.DeviceType == ERequenceDeviceType::RDT_Unique)
+			{
+				URD_Unique* newDevice = NewObject<URD_Unique>(this, URD_Unique::StaticClass());
+				newDevice->FromStruct(SavedDevice, this, FullAxisList, FullActionList);
+				Devices.Add(newDevice);
+			}
+			else 
+			{
+				URequenceDevice* newDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+				newDevice->FromStruct(SavedDevice, this, FullAxisList, FullActionList);
+				Devices.Add(newDevice);
+			}
 		}
 		if (Devices.Num() > 0)
 		{
@@ -313,7 +324,7 @@ void URequence::RequenceInputDevicesUpdated()
 
 		//No device found. Create one!
 		if (!found) {
-			found = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+			found = NewObject<URD_Unique>(this, URD_Unique::StaticClass());
 			found->DeviceType = ERequenceDeviceType::RDT_Unique;
 			found->DeviceString = RIDevice.Name;
 			found->DeviceName = RIDevice.Name;
@@ -321,22 +332,14 @@ void URequence::RequenceInputDevicesUpdated()
 			found->AddAllEmpty(FullAxisList, FullActionList);
 			found->SortAlphabetically();
 			found->CompactifyAllKeyNames();
-
-			for (auto& Axises : RIDevice.Axises)
-			{
-				found->PhysicalAxises.Add(Axises.Value.ToString());
-			}
-			for (auto& Buttons : RIDevice.Buttons)
-			{
-				found->PhysicalButtons.Add(Buttons.Value.ToString());
-			}
-
 			Devices.Add(found);
 		}
 
 		//Update status.
 		found->DeviceString = RIDevice.Name;
 		found->DeviceName = RIDevice.Name;
+		Cast<URD_Unique>(found)->LoadDefaultPhysicalData(RIDevice);
+
 		found->Connected = true;
 	}
 
@@ -348,7 +351,14 @@ void URequence::ExportDeviceAsPreset(URequenceDevice* Device)
 	//Serialize JSON
 	FString OutputString;
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
-	FJsonSerializer::Serialize(Device->GetDeviceAsJson().ToSharedRef(), Writer);
+	if (Device->DeviceType == ERequenceDeviceType::RDT_Unique) 
+	{
+		FJsonSerializer::Serialize(Cast<URD_Unique>(Device)->GetDeviceAsJson().ToSharedRef(), Writer);
+	}
+	else 
+	{
+		FJsonSerializer::Serialize(Device->GetDeviceAsJson().ToSharedRef(), Writer);
+	}
 
 	//Save to file
 	FString FileName = FString(Device->DeviceString + "_" + FDateTime::Now().ToString() + ".json");
@@ -391,6 +401,11 @@ bool URequence::ImportDeviceAsPreset(FString AbsolutePath)
 				if (jsonver != Version) { return false; }
 
 				URequenceDevice* NewDevice = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+
+				if (StringToEnum<ERequenceDeviceType>("ERequenceDeviceType", sDeviceType) == ERequenceDeviceType::RDT_Unique) {
+					NewDevice = NewObject<URD_Unique>(this, URD_Unique::StaticClass());
+					Cast<URD_Unique>(NewDevice)->bHasPhysicalData = false;	//todo: load physicaldata from JSON
+				}
 				NewDevice->DeviceType = StringToEnum<ERequenceDeviceType>("ERequenceDeviceType", sDeviceType);
 				NewDevice->DeviceName = JsonDevice->GetStringField(TEXT("DeviceName"));
 				NewDevice->DeviceString = JsonDevice->GetStringField(TEXT("DeviceString"));
@@ -490,6 +505,11 @@ URequenceDevice* URequence::CreateDevice(FString KeyName)
 	if (!IsValid(GetDeviceByType(NewDeviceType)))
 	{
 		URequenceDevice* device = NewObject<URequenceDevice>(this, URequenceDevice::StaticClass());
+		if (NewDeviceType == ERequenceDeviceType::RDT_Unique)
+		{
+			device = NewObject<URD_Unique>(this, URD_Unique::StaticClass());
+		}
+
 		device->DeviceType = NewDeviceType;
 		device->DeviceString = URequenceDevice::GetDeviceNameByType(NewDeviceType);
 		device->DeviceName = device->DeviceString;

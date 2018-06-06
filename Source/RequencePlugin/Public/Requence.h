@@ -26,7 +26,7 @@ class REQUENCEPLUGIN_API URequence : public UObject
 	GENERATED_BODY()
 private:
 	//Version of Requence. If this number is different than it is in the save file, it will clear the save to ensure compatibility.
-	UPROPERTY()						int Version = 1;
+	UPROPERTY()						int Version = 2;
 
 public:
 	URequence();
