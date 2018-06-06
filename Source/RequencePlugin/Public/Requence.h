@@ -24,11 +24,10 @@ UCLASS(EditInlineNew, Meta=(BlueprintSpawnableComponent), BlueprintType)
 class REQUENCEPLUGIN_API URequence : public UObject
 {
 	GENERATED_BODY()
-private:
-	//Version of Requence. If this number is different than it is in the save file, it will clear the save to ensure compatibility.
-	UPROPERTY()						int Version = 2;
-
 public:
+	//Version of Requence. If this number is different than it is in the save file, it will clear the save to ensure compatibility.
+	static const int Version = 2;
+
 	URequence();
 	~URequence();
 
@@ -93,6 +92,7 @@ public:
 
 	//Function to run on game startup. Loads in Save game and applies custom inputs to runtime.
 	UFUNCTION(BlueprintCallable)	void OnGameStartup();
+
 private:
 	//Delegate callback for when RID devices are updated.
 	UFUNCTION()						void RequenceInputDevicesUpdated();

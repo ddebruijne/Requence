@@ -130,7 +130,8 @@ UCLASS()
 class URequenceStructs : public UObject
 {
 	GENERATED_BODY()
-
+public:
 	URequenceStructs();
 
+	static float Interpolate(TArray<FVector2D> Points, float val);
 };

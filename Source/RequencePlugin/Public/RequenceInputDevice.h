@@ -59,6 +59,7 @@ public:
 	FRIDUpdate OnDevicesUpdated;
 	bool bOwnsSDL = false;
 	TArray<FSDLDeviceInfo> Devices;
+	TArray<FRequenceSaveObjectDevice> DeviceProperties;
 
 	RequenceInputDevice() {}
 	RequenceInputDevice(const TSharedRef<FGenericApplicationMessageHandler>& InMessageHandler);
@@ -69,6 +70,7 @@ public:
 	bool AddDevice(int Which);
 	bool RemDevice(int InstanceID);
 	int GetDeviceIndexByWhich(int Which);
+	void LoadRequenceDeviceProperties();
 
 	void HandleInput_Hat(SDL_Event* e);
 	void HandleInput_Button(SDL_Event* e);
