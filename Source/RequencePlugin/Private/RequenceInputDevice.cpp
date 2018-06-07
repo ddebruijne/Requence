@@ -6,6 +6,7 @@
 #include "SlateApplication.h"
 #include "RequenceSaveObject.h"
 #include "Requence.h"
+#include "RequenceStructs.h"
 
 #define LOCTEXT_NAMESPACE "RequencePlugin"
 
@@ -339,12 +340,21 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 	if (DeviceProperties.Num() > 0) {
 		for (int i = 0; i < DeviceProperties.Num(); i++)
 		{
+			//Check for the correct device, and if it has physicalAxis data stored.
 			if (DeviceProperties[i].DeviceString != Devices[DevID].Name) { continue; }
 			if (DeviceProperties[i].PhysicalAxises.Num() <= 0) { continue; }
 
+			//Compress (-1 ~ 1) to (0 ~ 1) if we set halved.
+			if (DeviceProperties[i].PhysicalAxises[AxisID].InputRange == ERequencePAInputRange::RPAIR_Halved)
+			{
+				NewAxisState = FMath::Clamp((NewAxisState + 1) / 2, 0.f, 1.f);
+			}
+
+			//TODO: pre-calculate the data array instead of building a whole array every update, which is often!
+			//If we have datapoints, interpolate data.
+			if (DeviceProperties[i].PhysicalAxises[AxisID].DataPoints.Num() <= 0) { continue; }
 			float interp = URequenceStructs::Interpolate(DeviceProperties[i].PhysicalAxises[AxisID].DataPoints, NewAxisState);
-			if(interp != 0) { NewAxisState = interp; }
-			
+			NewAxisState = interp;
 		}
 	}
 

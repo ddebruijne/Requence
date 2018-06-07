@@ -47,6 +47,13 @@ enum class ERequenceLoadError : uint8
 	RLE_FileNotFound		UMETA(DisplayName = "File not found")
 };
 
+UENUM(BlueprintType)
+enum class ERequencePAInputRange : uint8
+{
+	RPAIR_Default			UMETA(DisplayName = "Default (-1 to 1)"),
+	RPAIR_Halved			UMETA(DisplayName = "Halved (0 to 1)")
+};
+
 USTRUCT(BlueprintType)
 struct FRequencePhysicalAxis
 {
@@ -56,9 +63,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString Axis;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FVector2D> DataPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERequencePAInputRange InputRange;
 
-	FRequencePhysicalAxis() {}
-	FRequencePhysicalAxis(FString _Axis) { Axis = _Axis; }
+	FRequencePhysicalAxis() { InputRange = ERequencePAInputRange::RPAIR_Default; }
+	FRequencePhysicalAxis(FString _Axis) 
+	{
+		Axis = _Axis;  
+		InputRange = ERequencePAInputRange::RPAIR_Default;
+	}
 };
 
 USTRUCT(BlueprintType)

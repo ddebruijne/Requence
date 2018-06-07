@@ -17,14 +17,22 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	bool bHasPhysicalData = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	TArray<FString> PhysicalButtons;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	TArray<FRequencePhysicalAxis> PhysicalAxises;
-	
+
+	//////////////////////////////////////////////////////////////////////////
+	// Physical Axis configuration
+	//////////////////////////////////////////////////////////////////////////
+
 	void LoadDefaultPhysicalData(FSDLDeviceInfo Data);
 
-	UFUNCTION(BlueprintCallable)
-	FRequencePhysicalAxis GetPhysicalAxisByName(FString PhysicalAxisName);
+	//Retreives a copy of a physical axis struct.
+	UFUNCTION(BlueprintCallable)	FRequencePhysicalAxis GetPhysicalAxisByName(FString PhysicalAxisName);
 
-	UFUNCTION(BlueprintCallable)
-	bool UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D> DataPoints);
+	//Updates a physical axis struct. AxisNames must match.
+	UFUNCTION(BlueprintCallable)	bool UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D> DataPoints);
+
+	//Updates a physical axis struct. AxisNames must match.
+	UFUNCTION(BlueprintCallable)	bool UpdatePhysicalAxis(FRequencePhysicalAxis toUpdate);
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// JSON Import/Export

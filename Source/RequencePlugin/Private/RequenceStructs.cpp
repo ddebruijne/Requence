@@ -8,11 +8,16 @@ URequenceStructs::URequenceStructs()
 
 float URequenceStructs::Interpolate(TArray<FVector2D> Points, float val)
 {
-	Points.Insert(FVector2D::ZeroVector, 0);
-	Points.Add(FVector2D(1, 1));
-	//Todo: Add mirror of array for -1.
+	TArray<FVector2D> Data;
 
-	for (int i = 1; i < Points.Num(); i++)	//Note, skips first
+	//Build new data array, first -1, then flip points and add them as negative. add zero, add points, add 1.
+	Data.Add(FVector2D(-1, -1));
+	for (int i = Points.Num(); i >= 0; i--) { Data.Add(FVector2D(Points[i].X * -1, Points[i].Y * -1)); }
+	Data.Add(FVector2D::ZeroVector);
+	for (FVector2D vec : Points) { Data.Add(vec); }
+	Data.Add(FVector2D(1, 1));
+
+	for (int i = 1; i < Data.Num(); i++)	//Note, skips first
 	{
 		if (Points[i].X < val) { continue; }
 

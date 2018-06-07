@@ -44,6 +44,18 @@ bool URD_Unique::UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D
 	return false;
 }
 
+bool URD_Unique::UpdatePhysicalAxis(FRequencePhysicalAxis toUpdate)
+{
+	for (int i = 0; i < PhysicalAxises.Num(); i++)
+	{
+		if (PhysicalAxises[i].Axis == toUpdate.Axis) {
+			PhysicalAxises[i] = toUpdate;
+			return true;
+		}
+	}
+	return false;
+}
+
 TSharedPtr<FJsonObject> URD_Unique::GetDeviceAsJson()
 {
 	TSharedPtr<FJsonObject> Preset = URequenceDevice::GetDeviceAsJson();
@@ -64,6 +76,7 @@ TSharedPtr<FJsonObject> URD_Unique::GetDeviceAsJson()
 			datapoints.Add(datapointvalue);
 		}
 		JSONPhysicalAxis->SetArrayField("CurveDataPoints", datapoints);
+		JSONPhysicalAxis->SetStringField("InputRange", EnumToString<ERequencePAInputRange>("ERequencePAInputRange", pa.InputRange));
 
 		TSharedRef<FJsonValueObject> PhysicalAxisValue = MakeShareable(new FJsonValueObject(JSONPhysicalAxis));
 		axises.Add(PhysicalAxisValue);
