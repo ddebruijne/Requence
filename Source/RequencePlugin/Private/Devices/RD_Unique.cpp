@@ -37,6 +37,7 @@ bool URD_Unique::UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D
 	{
 		if (PhysicalAxises[i].Axis == AxisName) {
 			PhysicalAxises[i].DataPoints = DataPoints;
+			this->Updated = true;
 			return true;
 		}
 	}
@@ -50,6 +51,7 @@ bool URD_Unique::UpdatePhysicalAxis(FRequencePhysicalAxis toUpdate)
 	{
 		if (PhysicalAxises[i].Axis == toUpdate.Axis) {
 			PhysicalAxises[i] = toUpdate;
+			this->Updated = true;
 			return true;
 		}
 	}

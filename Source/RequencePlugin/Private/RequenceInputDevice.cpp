@@ -347,10 +347,17 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 			if (DeviceProperties[i].DeviceString != Devices[DevID].Name) { continue; }
 			if (DeviceProperties[i].PhysicalAxises.Num() <= 0) { continue; }
 
-			//Compress (-1 ~ 1) to (0 ~ 1) if we set halved.
-			if (DeviceProperties[i].PhysicalAxises[AxisID].InputRange == ERequencePAInputRange::RPAIR_Halved)
-			{
+			switch (DeviceProperties[i].PhysicalAxises[AxisID].InputRange) {
+			case ERequencePAInputRange::RPAIR_Halved:
+				//Compress -1~1 to 0~1
 				NewAxisState = FMath::Clamp((NewAxisState + 1) / 2, 0.f, 1.f);
+				break;
+			case ERequencePAInputRange::RPAIR_HalvedNegative:
+				//Compress -1~1 to -1~0
+				NewAxisState = FMath::Clamp((NewAxisState - 1) / 2, -1.f, 0.f);
+				break;
+			default:
+				break;
 			}
 
 			//If we have datapoints and they are precached, interpolate data.

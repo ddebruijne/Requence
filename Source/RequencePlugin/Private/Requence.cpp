@@ -222,7 +222,8 @@ bool URequence::SaveInput()
 bool URequence::ApplyAxisesAndActions(bool Force)
 {
 	UInputSettings* Settings = GetMutableDefault<UInputSettings>();
-	if (!Settings) { return false; }
+	if (!Settings) { return false;
+	}
 
 	if (HasUpdated() || Force)
 	{
@@ -263,6 +264,11 @@ bool URequence::ApplyAxisesAndActions(bool Force)
 		{
 			It->ForceRebuildingKeyMaps(true);
 		}
+
+		FRequencePluginModule& RPM = FModuleManager::LoadModuleChecked<FRequencePluginModule>("RequencePlugin");
+		if (!RPM.InputDevice.IsValid()) { return false; }
+		RPM.InputDevice->LoadRequenceDeviceProperties();
+
 		return true;
 	}
 	return false;
@@ -432,6 +438,8 @@ bool URequence::ImportDeviceAsPreset(FString AbsolutePath)
 					Devices.Remove(GetDeviceByType(NewDevice->DeviceType));
 				}
 				Devices.Add(NewDevice);
+
+
 
 				UE_LOG(LogTemp, Log, TEXT("Requence imported %s"), *NewDevice->DeviceName);
 				return true;

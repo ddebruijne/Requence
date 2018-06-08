@@ -51,7 +51,8 @@ UENUM(BlueprintType)
 enum class ERequencePAInputRange : uint8
 {
 	RPAIR_Default			UMETA(DisplayName = "Default (-1 to 1)"),
-	RPAIR_Halved			UMETA(DisplayName = "Halved (0 to 1)")
+	RPAIR_Halved			UMETA(DisplayName = "Halved (0 to 1)"),
+	RPAIR_HalvedNegative	UMETA(DisplayName = "Halved (-1 to 0)")
 };
 
 USTRUCT(BlueprintType)
@@ -71,7 +72,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERequencePAInputRange InputRange;
 
 	//Whether datapoints are precached. DO NOT SAVE IF PRECACHED.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bIsPrecached = false;
+	UPROPERTY() bool bIsPrecached = false;
 
 	FRequencePhysicalAxis() { InputRange = ERequencePAInputRange::RPAIR_Default; }
 	FRequencePhysicalAxis(FString _Axis) 
