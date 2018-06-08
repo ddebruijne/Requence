@@ -246,6 +246,9 @@ void RequenceInputDevice::LoadRequenceDeviceProperties()
 	for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
 	{
 		if (SavedDevice.DeviceType != ERequenceDeviceType::RDT_Unique) { continue; }
+		for (int i = 0; i < SavedDevice.PhysicalAxises.Num(); i++) {
+			SavedDevice.PhysicalAxises[i].PrecacheDatapoints();
+		}
 		DeviceProperties.Add(SavedDevice);
 	}
 }
@@ -350,9 +353,8 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 				NewAxisState = FMath::Clamp((NewAxisState + 1) / 2, 0.f, 1.f);
 			}
 
-			//TODO: pre-calculate the data array instead of building a whole array every update, which is often!
-			//If we have datapoints, interpolate data.
-			if (DeviceProperties[i].PhysicalAxises[AxisID].DataPoints.Num() <= 0) { continue; }
+			//If we have datapoints and they are precached, interpolate data.
+			if (DeviceProperties[i].PhysicalAxises[AxisID].DataPoints.Num() <= 0 && DeviceProperties[i].PhysicalAxises[AxisID].bIsPrecached) { continue; }
 			float interp = URequenceStructs::Interpolate(DeviceProperties[i].PhysicalAxises[AxisID].DataPoints, NewAxisState);
 			NewAxisState = interp;
 		}

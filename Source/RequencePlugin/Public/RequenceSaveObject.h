@@ -24,6 +24,7 @@ public:
 	UPROPERTY()		TArray<FRequencePhysicalAxis> PhysicalAxises;
 
 	FRequenceSaveObjectDevice() {}
+
 };
 
 UCLASS()
