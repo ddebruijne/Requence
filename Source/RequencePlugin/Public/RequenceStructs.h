@@ -47,6 +47,56 @@ enum class ERequenceLoadError : uint8
 	RLE_FileNotFound		UMETA(DisplayName = "File not found")
 };
 
+UENUM(BlueprintType)
+enum class ERequencePAInputRange : uint8
+{
+	RPAIR_Default			UMETA(DisplayName = "Default (-1 to 1)"),
+	RPAIR_Halved			UMETA(DisplayName = "Halved (0 to 1)"),
+	RPAIR_HalvedNegative	UMETA(DisplayName = "Halved (-1 to 0)")
+};
+
+USTRUCT(BlueprintType)
+struct FRequencePhysicalAxis
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+	
+	//Axis Name
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	FString Axis;
+
+	//Data points of curve editor, scaled -1 to 1, only positive values. No 0 and 1.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) TArray<FVector2D> DataPoints;
+
+	//Input range setting
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) ERequencePAInputRange InputRange;
+
+	//Whether datapoints are precached. DO NOT SAVE IF PRECACHED.
+	UPROPERTY() bool bIsPrecached = false;
+
+	FRequencePhysicalAxis() { InputRange = ERequencePAInputRange::RPAIR_Default; }
+	FRequencePhysicalAxis(FString _Axis) 
+	{
+		Axis = _Axis;  
+		InputRange = ERequencePAInputRange::RPAIR_Default;
+	}
+
+	void PrecacheDatapoints() 
+	{
+		TArray<FVector2D> Precached;
+
+		//Build new data array, first -1, then flip points and add them as negative. add zero, add points, add 1.
+		Precached.Add(FVector2D(-1, -1));
+		for (int i = DataPoints.Num()-1; i >= 0; i--) { Precached.Add(FVector2D(DataPoints[i].X * -1, DataPoints[i].Y * -1)); }
+		Precached.Add(FVector2D::ZeroVector);
+		for (FVector2D vec : DataPoints) { Precached.Add(vec); }
+		Precached.Add(FVector2D(1, 1));
+
+		DataPoints = Precached;
+		bIsPrecached = true;
+	}
+};
+
 USTRUCT(BlueprintType)
 struct FRequenceInputAction
 {
@@ -116,7 +166,8 @@ UCLASS()
 class URequenceStructs : public UObject
 {
 	GENERATED_BODY()
-
+public:
 	URequenceStructs();
 
+	static float Interpolate(TArray<FVector2D> Points, float val);
 };

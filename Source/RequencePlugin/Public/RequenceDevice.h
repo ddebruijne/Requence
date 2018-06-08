@@ -109,14 +109,14 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 	//Fills this device from a requence save object device.
-	void FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef,
-		TArray<FString> FullAxisList, TArray<FString> FullActionList);
+	virtual void FromStruct(FRequenceSaveObjectDevice StructIn, URequence* _RequenceRef,
+				TArray<FString> FullAxisList, TArray<FString> FullActionList);
 
 	//Creates a save object device from this device.
-	FRequenceSaveObjectDevice ToStruct();
+	virtual FRequenceSaveObjectDevice ToStruct();
 
 	//Retrieves this class' data as a JSON object.
-	TSharedPtr<FJsonObject> GetDeviceAsJson();
+	virtual TSharedPtr<FJsonObject> GetDeviceAsJson();
 
 	//Retrieves action bindings as JSON array
 	TArray<TSharedPtr<FJsonValue>> GetActionsAsJson();

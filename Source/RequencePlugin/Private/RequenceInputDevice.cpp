@@ -4,6 +4,9 @@
 #include "Text.h"
 #include "Events.h"
 #include "SlateApplication.h"
+#include "RequenceSaveObject.h"
+#include "Requence.h"
+#include "RequenceStructs.h"
 
 #define LOCTEXT_NAMESPACE "RequencePlugin"
 
@@ -60,8 +63,9 @@ void RequenceInputDevice::InitSDL()
 	for (int i = 0; i < SDL_NumJoysticks(); i++) 
 	{
 		AddDevice(i);
-		
 	}
+
+	LoadRequenceDeviceProperties();
 
 	SDL_AddEventWatch(HandleSDLEvent, this);
 }
@@ -228,6 +232,27 @@ int RequenceInputDevice::GetDeviceIndexByWhich(int Which)
 	return -1;
 }
 
+void RequenceInputDevice::LoadRequenceDeviceProperties()
+{
+	URequenceSaveObject* RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::CreateSaveGameObject(URequenceSaveObject::StaticClass()));
+	if (!UGameplayStatics::DoesSaveGameExist(RSO_Instance->SaveSlotName, RSO_Instance->UserIndex)) { return; }
+
+	RSO_Instance = Cast<URequenceSaveObject>(UGameplayStatics::LoadGameFromSlot(RSO_Instance->SaveSlotName, RSO_Instance->UserIndex));
+	if (RSO_Instance->Devices.Num() <= 0) { return; }
+
+	if (RSO_Instance->RequenceVersion != URequence::Version) { return; }
+
+	DeviceProperties.Empty();
+	for (FRequenceSaveObjectDevice SavedDevice : RSO_Instance->Devices)
+	{
+		if (SavedDevice.DeviceType != ERequenceDeviceType::RDT_Unique) { continue; }
+		for (int i = 0; i < SavedDevice.PhysicalAxises.Num(); i++) {
+			SavedDevice.PhysicalAxises[i].PrecacheDatapoints();
+		}
+		DeviceProperties.Add(SavedDevice);
+	}
+}
+
 void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 {
 	if (!bOwnsSDL) { return; }
@@ -314,11 +339,38 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 	int AxisID = e->jaxis.axis;
 	float NewAxisState = FMath::Clamp(e->jaxis.value / (e->jaxis.value < 0 ? 32768.0f : 32767.0f), -1.f, 1.f);
 
+	//Filter based on Requence save file.
+	if (DeviceProperties.Num() > 0) {
+		for (int i = 0; i < DeviceProperties.Num(); i++)
+		{
+			//Check for the correct device, and if it has physicalAxis data stored.
+			if (DeviceProperties[i].DeviceString != Devices[DevID].Name) { continue; }
+			if (DeviceProperties[i].PhysicalAxises.Num() <= 0) { continue; }
+
+			switch (DeviceProperties[i].PhysicalAxises[AxisID].InputRange) {
+			case ERequencePAInputRange::RPAIR_Halved:
+				//Compress -1~1 to 0~1
+				NewAxisState = FMath::Clamp((NewAxisState + 1) / 2, 0.f, 1.f);
+				break;
+			case ERequencePAInputRange::RPAIR_HalvedNegative:
+				//Compress -1~1 to -1~0
+				NewAxisState = FMath::Clamp((NewAxisState - 1) / 2, -1.f, 0.f);
+				break;
+			default:
+				break;
+			}
+
+			//If we have datapoints and they are precached, interpolate data.
+			if (DeviceProperties[i].PhysicalAxises[AxisID].DataPoints.Num() <= 0 && DeviceProperties[i].PhysicalAxises[AxisID].bIsPrecached) { continue; }
+			float interp = URequenceStructs::Interpolate(DeviceProperties[i].PhysicalAxises[AxisID].DataPoints, NewAxisState);
+			NewAxisState = interp;
+		}
+	}
+
 	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
 	if (!Devices[DevID].Axises.Contains(AxisID)) { return; }
 
-	FAnalogInputEvent AxisEvent(Devices[DevID].Axises[AxisID], 
-		FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, NewAxisState);
+	FAnalogInputEvent AxisEvent(Devices[DevID].Axises[AxisID], FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, NewAxisState);
 	FSlateApplication::Get().ProcessAnalogInputEvent(AxisEvent);
 
 	Devices[DevID].OldAxisState[AxisID] = NewAxisState;

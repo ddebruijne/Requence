@@ -478,6 +478,7 @@ TSharedPtr<FJsonObject> URequenceDevice::GetDeviceAsJson()
 
 	Preset->SetArrayField("Actions", GetActionsAsJson());
 	Preset->SetArrayField("Axises", GetAxisesAsJson());
+
 	Preset->SetStringField("Timestamp", FDateTime::Now().ToString());
 	if (IsValid(RequenceRef))
 	{

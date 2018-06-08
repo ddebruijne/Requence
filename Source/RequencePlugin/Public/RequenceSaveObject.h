@@ -12,13 +12,19 @@ struct FRequenceSaveObjectDevice
 	GENERATED_USTRUCT_BODY()
 
 public:
+	//Global device data
 	UPROPERTY()		FString DeviceString = "Unknown";
 	UPROPERTY()		FString DeviceName = "Unknown";
 	UPROPERTY()		ERequenceDeviceType DeviceType = ERequenceDeviceType::RDT_Unknown;
 	UPROPERTY()		TArray<FRequenceInputAction> Actions;	//Note: filtered without empty actions. 
 	UPROPERTY()		TArray<FRequenceInputAxis> Axises;		//Note: filtered without empty actions.
 
+	//Unique device data
+	UPROPERTY()		TArray<FString> PhysicalButtons;
+	UPROPERTY()		TArray<FRequencePhysicalAxis> PhysicalAxises;
+
 	FRequenceSaveObjectDevice() {}
+
 };
 
 UCLASS()
