@@ -79,6 +79,17 @@ public class RequencePlugin : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
+
+		if (Target.Platform == UnrealTargetPlatform.Win64)
+        {
+            string _dllPath = Path.GetFullPath(Path.Combine(ModuleDirectory, "../../Binaries/ThirdParty/Win64"));
+            RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(_dllPath, "SDL2.dll")));
+        }
+        else if(Target.Platform == UnrealTargetPlatform.Win32)
+        {
+            string _dllPath = Path.GetFullPath(Path.Combine(ModuleDirectory, "../../Binaries/ThirdParty/Win32"));
+            RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(_dllPath, "SDL2.dll")));
+        }
     }
 }
 //         PublicAdditionalLibraries.Add(Path.GetFullPath(ModuleDirectory + "/../../Binaries/" + Target.Platform.ToString() + "/SDL2.dll"));
