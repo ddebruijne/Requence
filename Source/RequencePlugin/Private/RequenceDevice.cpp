@@ -102,7 +102,7 @@ FString URequenceDevice::CompactifyKeyString(FString InName)
 	outName = outName.Replace(TEXT("Control"), TEXT("ctrl"));
 	outName = outName.Replace(TEXT("Command"), TEXT("cmd"));
 	outName = outName.Replace(TEXT("_"), TEXT(" "));
-	outName.Trim();
+	outName.TrimStartInline();
 	return outName;
 }
 

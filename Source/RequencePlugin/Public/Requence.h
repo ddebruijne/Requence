@@ -140,7 +140,7 @@ public:
 	UFUNCTION(BlueprintCallable)	bool HasUpdated();
 
 	//Returns the default import/export path for input presets.
-	UFUNCTION(BlueprintCallable)	FString GetDefaultPresetFilePath() { return FPaths::GameSavedDir() + "InputPresets/"; }
+	UFUNCTION(BlueprintCallable)	FString GetDefaultPresetFilePath() { return FPaths::ProjectSavedDir() + "InputPresets/"; }
 
 	//Returns whether edit mode is enabled, if enabled it will also return the device type. if not device type is null.
 	UFUNCTION(BlueprintCallable)	bool GetEditModeEnabled(ERequenceDeviceType& DeviceType);
