@@ -31,6 +31,16 @@ FRequencePhysicalAxis URD_Unique::GetPhysicalAxisByName(FString PhysicalAxisName
 	return FRequencePhysicalAxis();
 }
 
+FRequencePhysicalAxis URD_Unique::GetPhysicalAxisByCompactifiedName(FString CompressedAxisName) 
+{
+	for (FRequencePhysicalAxis pa : PhysicalAxises)
+	{
+		if (CompactifyKeyString(pa.Axis) == CompressedAxisName) { return pa; }
+	}
+
+	return FRequencePhysicalAxis();
+}
+
 bool URD_Unique::UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D> DataPoints)
 {
 	for (int i = 0; i < PhysicalAxises.Num(); i++) 

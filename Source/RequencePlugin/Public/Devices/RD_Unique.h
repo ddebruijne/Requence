@@ -27,6 +27,9 @@ public:
 	//Retreives a copy of a physical axis struct.
 	UFUNCTION(BlueprintCallable)	FRequencePhysicalAxis GetPhysicalAxisByName(FString PhysicalAxisName);
 
+	//Retrieves a copy of a physical axis struct, by its compactified name.
+	UFUNCTION(BlueprintCallable)	FRequencePhysicalAxis GetPhysicalAxisByCompactifiedName(FString CompressedAxisName);
+
 	//Updates a physical axis struct. AxisNames must match.
 	UFUNCTION(BlueprintCallable)	bool UpdatePhysicalAxisDataPoints(FString AxisName, TArray<FVector2D> DataPoints);
 
