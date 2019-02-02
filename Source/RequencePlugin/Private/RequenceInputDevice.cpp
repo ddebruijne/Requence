@@ -222,15 +222,18 @@ bool RequenceInputDevice::RemDevice(int InstanceID)
 	return !found;
 }
 
-int RequenceInputDevice::GetDeviceIndexByWhich(int Which)
+int RequenceInputDevice::GetDeviceIndexByInstanceID(int InstanceID)
 {
-	for (int i = 0; i < Devices.Num(); i++) {
-		if (Devices[i].InstanceID == Which) {
+	for (int i = 0; i < Devices.Num(); i++)
+	{
+		if (Devices[i].InstanceID == InstanceID)
+		{
 			return i;
 		}
 	}
 	return -1;
 }
+
 
 void RequenceInputDevice::LoadRequenceDeviceProperties()
 {
@@ -258,10 +261,10 @@ void RequenceInputDevice::HandleInput_Hat(SDL_Event* e)
 	if (!bOwnsSDL) { return; }
 
 	FVector2D HatInput = HatStateToVector(e->jhat.value);
-	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	int DevID = GetDeviceIndexByInstanceID(e->jdevice.which);
 	int HatID = e->jhat.hat;
 
-	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
+	if (DevID == -1) { return; }
 	FVector2D OldHatState = HatStateToVector(Devices[DevID].OldHatState[HatID]);
 
 	//Button
@@ -306,11 +309,11 @@ void RequenceInputDevice::HandleInput_Button(SDL_Event* e)
 {
 	if (!bOwnsSDL) { return; }
 
-	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	int DevID = GetDeviceIndexByInstanceID(e->jdevice.which);
 	int ButtonID = e->jbutton.button;
 	bool NewButtonState = (e->jbutton.state > 0) ? true : false;
 
-	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
+	if (DevID == -1) { return; }
 	if (!Devices[DevID].Buttons.Contains(ButtonID)) { return; }
 
 	if (NewButtonState)
@@ -335,7 +338,7 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 {
 	if (!bOwnsSDL) { return; }
 
-	int DevID = GetDeviceIndexByWhich(e->jdevice.which);
+	int DevID = GetDeviceIndexByInstanceID(e->jdevice.which);
 	int AxisID = e->jaxis.axis;
 	float NewAxisState = FMath::Clamp(e->jaxis.value / (e->jaxis.value < 0 ? 32768.0f : 32767.0f), -1.f, 1.f);
 

@@ -69,7 +69,7 @@ public:
 	static int HandleSDLEvent(void* UserData, SDL_Event* e);
 	bool AddDevice(int Which);
 	bool RemDevice(int InstanceID);
-	int GetDeviceIndexByWhich(int Which);
+	int GetDeviceIndexByInstanceID(int InstanceID);
 	void LoadRequenceDeviceProperties();
 
 	void HandleInput_Hat(SDL_Event* e);
