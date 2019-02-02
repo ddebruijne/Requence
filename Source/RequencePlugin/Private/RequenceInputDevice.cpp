@@ -225,7 +225,7 @@ bool RequenceInputDevice::RemDevice(int InstanceID)
 int RequenceInputDevice::GetDeviceIndexByWhich(int Which)
 {
 	for (int i = 0; i < Devices.Num(); i++) {
-		if (Devices[i].Which == Which) {
+		if (Devices[i].InstanceID == Which) {
 			return i;
 		}
 	}
@@ -339,6 +339,8 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 	int AxisID = e->jaxis.axis;
 	float NewAxisState = FMath::Clamp(e->jaxis.value / (e->jaxis.value < 0 ? 32768.0f : 32767.0f), -1.f, 1.f);
 
+	if (DevID == -1) { return; }
+
 	//Filter based on Requence save file.
 	if (DeviceProperties.Num() > 0) {
 		for (int i = 0; i < DeviceProperties.Num(); i++)
@@ -367,7 +369,6 @@ void RequenceInputDevice::HandleInput_Axis(SDL_Event* e)
 		}
 	}
 
-	if (GetDeviceIndexByWhich(DevID) == -1) { return; }
 	if (!Devices[DevID].Axises.Contains(AxisID)) { return; }
 
 	FAnalogInputEvent AxisEvent(Devices[DevID].Axises[AxisID], FSlateApplication::Get().GetModifierKeys(), 0, false, 0, 0, NewAxisState);
